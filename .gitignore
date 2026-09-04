@@ -1,0 +1,21 @@
+node_modules/
+dist/
+dist-ssr/
+.env*
+*.local
+*.local.*
+firebase.local.json
+
+# deploy cache only; .firebaserc is committed so `firebase deploy` works from a
+# fresh clone (a project id is public, not a secret)
+.firebase/
+
+.DS_Store
+Thumbs.db
+
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+*.log
+npm-debug.log*

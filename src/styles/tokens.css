@@ -1,0 +1,151 @@
+/*
+ * Kinetiq design tokens for neutral surfaces, status colour and two themes.
+ *
+ * Every colour is defined on :root first. The dark block only *redefines*
+ * tokens, so there is no value that exists exclusively in one theme.
+ */
+
+:root {
+  /* ---- brand + status ------------------------------------------------ */
+  --c-green: #24bf77;
+  --c-green-soft: rgba(36, 191, 119, 0.12);
+  --c-red: #ff6b6b;
+  --c-red-soft: rgba(255, 107, 107, 0.12);
+  --c-amber: #f5a524;
+  --c-amber-soft: rgba(245, 165, 36, 0.14);
+  --c-blue: #38a3f5;
+  --c-blue-soft: rgba(56, 163, 245, 0.12);
+  --c-violet: #8b7bf7;
+
+  /* accent = the colour the product signs its name with */
+  --accent: var(--c-green);
+  --accent-contrast: #06301c;
+
+  /* ---- surfaces ------------------------------------------------------ */
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-2: #fafbfc;
+  --surface-inset: #f1f2f5;
+  --surface-hover: #f7f8fa;
+
+  /* ---- ink ----------------------------------------------------------- */
+  --text: #1b1c20;
+  --text-muted: #6b6e78;
+  --text-faint: #9b9ea8;
+  --text-on-accent: #ffffff;
+
+  /* ---- lines --------------------------------------------------------- */
+  --border: #e6e8ed;
+  --border-strong: #d6d9e0;
+  --border-accent: rgba(36, 191, 119, 0.4);
+
+  /* ---- elevation ----------------------------------------------------- */
+  /* flat-first: shadows are a whisper, borders carry the separation */
+  --shadow-sm: 0 1px 2px rgba(18, 20, 26, 0.05);
+  --shadow-md: 0 2px 4px rgba(18, 20, 26, 0.04), 0 6px 16px rgba(18, 20, 26, 0.06);
+  --shadow-lg: 0 8px 24px rgba(18, 20, 26, 0.1), 0 2px 6px rgba(18, 20, 26, 0.05);
+  --shadow-focus: 0 0 0 3px rgba(36, 191, 119, 0.25);
+
+  /* ---- geometry ------------------------------------------------------ */
+  --r-xs: 6px;
+  --r-sm: 8px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+  --r-full: 999px;
+
+  /* 4px base scale */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+
+  /* ---- type ---------------------------------------------------------- */
+  --font: 'Inter var', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Menlo,
+    Consolas, monospace;
+
+  --t-xs: 0.6875rem; /* 11 */
+  --t-sm: 0.75rem; /* 12 */
+  --t-base: 0.8125rem; /* 13 */
+  --t-md: 0.875rem; /* 14 */
+  --t-lg: 1rem; /* 16 */
+  --t-xl: 1.25rem; /* 20 */
+  --t-2xl: 1.625rem; /* 26 */
+  --t-3xl: 2rem; /* 32 */
+
+  /* ---- motion -------------------------------------------------------- */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --dur-slow: 320ms;
+
+  /* ---- categorical series -------------------------------------------- */
+  /*
+   * Used only for the operating-state distribution, where the slices ARE the
+   * subject (identity, not magnitude). Slot order is the colour-blind-safety
+   * mechanism, not decoration -- validated as an adjacent pairlist against the
+   * card surface in both themes (worst adjacent CVD dE 9.1 light / 8.4 dark).
+   * Three light slots sit under 3:1 on white, so the state legend always ships
+   * visible labels; identity is never carried by hue alone.
+   */
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
+  --series-6: #008300;
+  --series-7: #4a3aa7;
+  --series-8: #e34948;
+
+  /* ---- layout -------------------------------------------------------- */
+  --sidebar-w: 232px;
+  --sidebar-w-collapsed: 68px;
+  --topbar-h: 60px;
+  --content-max: 1440px;
+}
+
+:root[data-theme='dark'] {
+  --c-green-soft: rgba(36, 191, 119, 0.16);
+  --c-red-soft: rgba(255, 107, 107, 0.16);
+  --c-amber-soft: rgba(245, 165, 36, 0.18);
+  --c-blue-soft: rgba(56, 163, 245, 0.16);
+
+  --accent-contrast: #042414;
+
+  --bg: #111216;
+  --surface: #191b20;
+  --surface-2: #1d1f25;
+  --surface-inset: #131418;
+  --surface-hover: #212429;
+
+  --text: #eceef2;
+  --text-muted: #9096a1;
+  --text-faint: #6b707b;
+
+  --border: #282b32;
+  --border-strong: #363a43;
+  --border-accent: rgba(36, 191, 119, 0.45);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.25), 0 6px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-focus: 0 0 0 3px rgba(36, 191, 119, 0.3);
+
+  /* the same eight hues re-stepped for the dark surface, not an auto-flip */
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --series-5: #d55181;
+  --series-6: #008300;
+  --series-7: #9085e9;
+  --series-8: #e66767;
+}

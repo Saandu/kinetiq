@@ -1,0 +1,190 @@
+@import './tokens.css';
+
+/* ---- reset ----------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  /*
+   * Backstop, not a fix. Every layout here is built to fit — things shrink,
+   * wrap, truncate or drop — but one unbreakable string or an over-wide flex
+   * child would otherwise give the whole document a sideways scroll, which is
+   * miserable on a phone and makes a page feel broken.
+   *
+   * `clip` rather than `hidden` on purpose: `hidden` turns the root into a
+   * scroll container and silently kills `position: sticky` on the top bar.
+   * `clip` cuts the overflow without creating that scroll container.
+   */
+  overflow-x: clip;
+}
+
+body {
+  /* dvh tracks the viewport as mobile browsers collapse their toolbars; the vh
+     line stays as the fallback for anything that lacks it */
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-family: var(--font);
+  font-size: var(--t-base);
+  line-height: 1.55;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* the grey flash on tap reads as jank; :active states do this job properly */
+  -webkit-tap-highlight-color: transparent;
+  /* stops iOS enlarging body copy in landscape */
+  -webkit-text-size-adjust: 100%;
+  transition:
+    background-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+
+/* Locks the page behind the sidebar / a modal without the scroll position
+   jumping to the top, which is what `overflow: hidden` alone does on iOS. */
+body.is-locked {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.011em;
+}
+
+/* Metrics must not jitter as digits change -- the dashboard rewrites them
+   every tick. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- focus ----------------------------------------------------------- */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-xs);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ---- scrollbars ------------------------------------------------------ */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border: 3px solid transparent;
+  border-radius: var(--r-full);
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--text-faint);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+/* ---- touch ------------------------------------------------------------ */
+
+/*
+ * Hover styles stick on touch devices: tapping a card leaves it in its hover
+ * state until you tap elsewhere. Gating the interactive-surface hovers behind
+ * an actual hovering pointer keeps them for mice and drops them for thumbs.
+ */
+@media (hover: none) {
+  .card--interactive:hover {
+    border-color: var(--border);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* ---- shared utility --------------------------------------------------- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- route transition ------------------------------------------------- */
+/* Opacity-only and short so navigation remains responsive. */
+.route-fade-enter-active {
+  transition: opacity var(--dur) var(--ease-out);
+}
+
+.route-fade-leave-active {
+  transition: opacity var(--dur-fast) var(--ease);
+}
+
+.route-fade-enter-from,
+.route-fade-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
