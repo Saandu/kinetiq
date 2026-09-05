@@ -2,6 +2,7 @@
   "name": "kinetiq",
   "version": "1.0.0",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "description": "Kinetiq - condition monitoring dashboard for industrial machines",
   "engines": {

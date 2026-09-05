@@ -200,3 +200,13 @@ bundle measurement should not be presented as the size of the whole app.
 - Mode switches record local intent; they do not stop equipment or a real feed.
 - Local edits are not synchronized across tabs or devices.
 - Prediction windows are illustrative, not the output of a predictive model.
+
+## Copyright and permissions
+
+Copyright (c) 2026 Alexandru Lungu. All rights reserved.
+
+The source is public for portfolio review; this is not an open-source project.
+Reuse, modification and redistribution require prior written permission,
+except where applicable law or GitHub's Terms of Service permit otherwise.
+Third-party dependencies and materials retain their own licenses.
+See [LICENSE](LICENSE) for the full notice and permission requests.
