@@ -88,7 +88,7 @@ const segments = computed(() =>
 
 .statebar__legend {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
   gap: var(--s-2) var(--s-4);
   list-style: none;
   padding: 0;
@@ -120,9 +120,8 @@ const segments = computed(() =>
 .statebar__label {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
   color: var(--text-muted);
 }
 

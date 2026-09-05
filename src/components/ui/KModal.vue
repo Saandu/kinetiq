@@ -1,32 +1,66 @@
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { lockScroll, unlockScroll } from '@/composables/useScrollLock'
 
 const props = defineProps<{ open: boolean; title?: string; size?: 'sm' | 'md' }>()
 const emit = defineEmits<{ close: [] }>()
+const { t } = useI18n()
 
 const panel = ref<HTMLElement | null>(null)
+const titleId = useId()
+let previouslyFocused: HTMLElement | null = null
 
-/**
- * Escape-to-close and initial focus. Deliberately not a full focus trap: the
- * dialogs here are two buttons deep, and a half-correct trap is worse than
- * none. If these ever grow, swap the root for <dialog>.
- */
 function onKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape') emit('close')
+  if (event.key === 'Escape') {
+    emit('close')
+    return
+  }
+
+  if (event.key !== 'Tab' || !panel.value) return
+
+  const focusable = Array.from(
+    panel.value.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )
+  ).filter((element) => element.offsetParent !== null)
+
+  if (!focusable.length) {
+    event.preventDefault()
+    panel.value.focus()
+    return
+  }
+
+  const first = focusable[0]
+  const last = focusable[focusable.length - 1]
+  const active = document.activeElement
+
+  if (event.shiftKey && (active === first || !panel.value.contains(active))) {
+    event.preventDefault()
+    last.focus()
+  } else if (!event.shiftKey && active === last) {
+    event.preventDefault()
+    first.focus()
+  }
 }
 
 watch(
   () => props.open,
   async (open) => {
     if (open) {
+      previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null
       document.addEventListener('keydown', onKeydown)
       lockScroll()
       await nextTick()
-      panel.value?.querySelector<HTMLElement>('[data-autofocus]')?.focus()
+      ;(panel.value?.querySelector<HTMLElement>('[data-autofocus]') ??
+        panel.value?.querySelector<HTMLElement>('button') ??
+        panel.value)?.focus()
     } else {
       document.removeEventListener('keydown', onKeydown)
       unlockScroll()
+      await nextTick()
+      if (previouslyFocused?.isConnected) previouslyFocused.focus()
+      previouslyFocused = null
     }
   }
 )
@@ -47,10 +81,13 @@ onBeforeUnmount(() => {
           :class="`modal__panel--${size ?? 'sm'}`"
           role="dialog"
           aria-modal="true"
+          :aria-labelledby="title ? titleId : undefined"
+          :aria-label="title ? undefined : t('a11y.dialog')"
+          tabindex="-1"
         >
           <header class="modal__head">
-            <h2 class="modal__title">{{ title }}</h2>
-            <button class="modal__x" :aria-label="'close'" @click="emit('close')">
+            <h2 v-if="title" :id="titleId" class="modal__title">{{ title }}</h2>
+            <button class="modal__x" :aria-label="t('actions.close')" @click="emit('close')">
               <svg viewBox="0 0 16 16" aria-hidden="true">
                 <path
                   d="M4 4l8 8M12 4l-8 8"
@@ -76,7 +113,7 @@ onBeforeUnmount(() => {
 .modal {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: var(--z-modal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -91,7 +128,7 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: none;
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-lg);
 }
@@ -121,6 +158,7 @@ onBeforeUnmount(() => {
 .modal__x {
   display: grid;
   place-items: center;
+  margin-left: auto;
   width: 28px;
   height: 28px;
   border-radius: var(--r-xs);

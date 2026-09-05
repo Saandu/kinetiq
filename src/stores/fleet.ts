@@ -4,7 +4,7 @@ import { TICK_MS } from '@/config/brand'
 import { telemetry as source, reloadTelemetrySource } from '@/services/telemetryService'
 import { clearAll } from '@/services/storage'
 import { readRaw, writeRaw } from '@/services/storage'
-import type { FaultCategory } from '@/types/telemetry'
+import type { AlertLevel, FaultCategory } from '@/types/telemetry'
 
 /**
  * The fleet store owns the app's single clock.
@@ -88,10 +88,14 @@ export const useFleetStore = defineStore('fleet', () => {
     const list = statuses.value
     const online = list.filter((s) => s.online).length
     const alerts = list.filter((s) => s.alert >= 2).length
+    const highestAlert = list.reduce<AlertLevel>(
+      (highest, status) => (status.alert > highest ? status.alert : highest),
+      0
+    )
     const avg = list.length
       ? list.reduce((sum, s) => sum + s.availability, 0) / list.length
       : 0
-    return { total: list.length, online, alerts, avgAvailability: avg }
+    return { total: list.length, online, alerts, highestAlert, avgAvailability: avg }
   })
 
   const selectedMachine = computed(

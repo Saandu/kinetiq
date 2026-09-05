@@ -157,7 +157,7 @@ function windowLabel(w: FaultWindow) {
         </KCard>
 
         <div class="split">
-          <KCard :title="t('machine.maintenanceMonitoring')">
+          <KCard class="monitor-card" :title="t('machine.maintenanceMonitoring')">
             <div class="windows">
               <div class="windows__col">
                 <p class="windows__head">{{ t('machine.previousMaintenance') }}</p>
@@ -193,7 +193,7 @@ function windowLabel(w: FaultWindow) {
             </div>
           </KCard>
 
-          <KCard :title="t('machine.faultMonitoring')">
+          <KCard class="monitor-card" :title="t('machine.faultMonitoring')">
             <div class="windows">
               <div class="windows__col">
                 <p class="windows__head">{{ t('machine.previousFault') }}</p>
@@ -231,8 +231,12 @@ function windowLabel(w: FaultWindow) {
         </div>
 
         <div class="split">
-          <KCard :title="t('machine.maintenancePanel')" :hint="t('machine.maintenancePanelHint')">
-            <div class="logform">
+          <KCard
+            class="action-card"
+            :title="t('machine.maintenancePanel')"
+            :hint="t('machine.maintenancePanelHint')"
+          >
+            <form class="logform" @submit.prevent="addEntry">
               <KField v-slot="{ id }" :label="t('machine.date')">
                 <KInput :id="id" v-model="entryDate" type="date" />
               </KField>
@@ -247,8 +251,8 @@ function windowLabel(w: FaultWindow) {
                   :placeholder="t('machine.chooseCategory')"
                 />
               </KField>
-              <KButton variant="primary" @click="addEntry">{{ t('actions.add') }}</KButton>
-            </div>
+              <KButton type="submit" variant="primary">{{ t('actions.add') }}</KButton>
+            </form>
 
             <div class="log">
               <p class="log__head">{{ t('machine.loggedEntries') }}</p>
@@ -264,7 +268,7 @@ function windowLabel(w: FaultWindow) {
             </div>
           </KCard>
 
-          <KCard :title="t('machine.controlUnit')">
+          <KCard class="action-card" :title="t('machine.controlUnit')">
             <div class="modes">
               <div class="mode">
                 <div>
@@ -317,8 +321,13 @@ function windowLabel(w: FaultWindow) {
 
 .split {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
   gap: var(--s-5);
+}
+
+.monitor-card,
+.action-card {
+  container-type: inline-size;
 }
 
 .windows {
@@ -337,7 +346,8 @@ function windowLabel(w: FaultWindow) {
 }
 
 .win {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: var(--s-3);
   padding: var(--s-3) 0;
@@ -345,24 +355,46 @@ function windowLabel(w: FaultWindow) {
 }
 
 .win__cat {
-  flex: 1;
   min-width: 0;
   font-weight: 550;
+  overflow-wrap: anywhere;
 }
 
 .win__time {
   font-size: var(--t-sm);
   color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.win--next {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.win--next .win__cat {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.win--next .win__time {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.win--next :deep(.badge) {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: center;
 }
 
 .logform {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   align-items: end;
   gap: var(--s-3);
 }
 
-.logform > :last-child {
+.logform :deep(.btn) {
   grid-column: 1 / -1;
 }
 
@@ -436,37 +468,31 @@ function windowLabel(w: FaultWindow) {
   color: var(--text-muted);
 }
 
-@media (min-width: 720px) {
+@container (min-width: 600px) {
   .windows {
     grid-template-columns: 1fr 1fr;
   }
+}
 
+@container (min-width: 420px) {
   .logform {
-    grid-template-columns: 1fr 1fr auto auto;
+    grid-template-columns: 1fr 1fr;
   }
 
-  .logform > :last-child {
-    grid-column: auto;
+  .logform > :nth-child(3),
+  .logform :deep(.btn) {
+    grid-column: 1 / -1;
   }
 }
 
-/*
- * A native date field needs ~150px before it starts truncating its own
- * placeholder, and at 16px touch sizing two of them no longer fit side by side
- * on a small phone.
- */
-@media (max-width: 480px) {
+@container (min-width: 620px) {
   .logform {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(130px, 1fr) minmax(120px, 1fr) minmax(190px, 1.4fr) auto;
   }
 
-  .win {
-    flex-wrap: wrap;
-    gap: var(--s-2);
-  }
-
-  .win__cat {
-    flex: 1 1 100%;
+  .logform > :nth-child(3),
+  .logform :deep(.btn) {
+    grid-column: auto;
   }
 }
 </style>

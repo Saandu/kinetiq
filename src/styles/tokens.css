@@ -17,9 +17,16 @@
   --c-blue-soft: rgba(56, 163, 245, 0.12);
   --c-violet: #8b7bf7;
 
+  /* Text/icon variants meet WCAG contrast on their soft status surfaces. */
+  --c-green-ink: #117448;
+  --c-red-ink: #b4232d;
+  --c-amber-ink: #8a5200;
+  --c-blue-ink: #1769aa;
+
   /* accent = the colour the product signs its name with */
-  --accent: var(--c-green);
-  --accent-contrast: #06301c;
+  --accent: #117448;
+  --accent-hover: #0d633d;
+  --accent-ink: #117448;
 
   /* ---- surfaces ------------------------------------------------------ */
   --bg: #f4f5f7;
@@ -30,8 +37,8 @@
 
   /* ---- ink ----------------------------------------------------------- */
   --text: #1b1c20;
-  --text-muted: #6b6e78;
-  --text-faint: #9b9ea8;
+  --text-muted: #565b66;
+  --text-faint: #696e79;
   --text-on-accent: #ffffff;
 
   /* ---- lines --------------------------------------------------------- */
@@ -87,6 +94,13 @@
   --dur: 200ms;
   --dur-slow: 320ms;
 
+  /* ---- stacking ------------------------------------------------------ */
+  --z-sticky: 30;
+  --z-scrim: 35;
+  --z-drawer: 40;
+  --z-modal: 90;
+  --z-toast: 100;
+
   /* ---- categorical series -------------------------------------------- */
   /*
    * Used only for the operating-state distribution, where the slices ARE the
@@ -118,7 +132,14 @@
   --c-amber-soft: rgba(245, 165, 36, 0.18);
   --c-blue-soft: rgba(56, 163, 245, 0.16);
 
-  --accent-contrast: #042414;
+  --c-green-ink: #58d99b;
+  --c-red-ink: #ff8585;
+  --c-amber-ink: #ffc45f;
+  --c-blue-ink: #68bbfa;
+
+  --accent: var(--c-green);
+  --accent-hover: #35ce88;
+  --accent-ink: #58d99b;
 
   --bg: #111216;
   --surface: #191b20;
@@ -127,8 +148,9 @@
   --surface-hover: #212429;
 
   --text: #eceef2;
-  --text-muted: #9096a1;
-  --text-faint: #6b707b;
+  --text-muted: #a9afba;
+  --text-faint: #858b96;
+  --text-on-accent: #07321e;
 
   --border: #282b32;
   --border-strong: #363a43;

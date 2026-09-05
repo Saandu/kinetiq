@@ -40,21 +40,21 @@ withDefaults(
 
 .badge--good {
   background: var(--c-green-soft);
-  color: var(--c-green);
+  color: var(--c-green-ink);
 }
 
 .badge--bad {
   background: var(--c-red-soft);
-  color: var(--c-red);
+  color: var(--c-red-ink);
 }
 
 .badge--warn {
   background: var(--c-amber-soft);
-  color: var(--c-amber);
+  color: var(--c-amber-ink);
 }
 
 .badge--info {
   background: var(--c-blue-soft);
-  color: var(--c-blue);
+  color: var(--c-blue-ink);
 }
 </style>

@@ -110,7 +110,12 @@ function save(which: 'states' | 'alerts') {
           </KField>
         </div>
 
-        <p class="risk" :class="alertThresholdsValid ? 'risk--low' : 'risk--high'">
+        <p
+          class="risk"
+          :class="alertThresholdsValid ? 'risk--low' : 'risk--high'"
+          role="status"
+          aria-live="polite"
+        >
           {{ t(alertThresholdsValid ? 'settings.thresholdsValid' : 'settings.invalidThresholds') }}
         </p>
       </KCard>
@@ -148,20 +153,20 @@ function save(which: 'states' | 'alerts') {
   margin-top: var(--s-5);
   padding: var(--s-3) var(--s-4);
   border-radius: var(--r-sm);
-  border-left: 3px solid;
+  border: 1px solid;
   font-size: var(--t-sm);
   line-height: 1.5;
 }
 
 .risk--low {
   background: var(--c-green-soft);
-  border-color: var(--c-green);
+  border-color: color-mix(in srgb, var(--c-green) 45%, var(--border));
   color: var(--text);
 }
 
 .risk--high {
   background: var(--c-red-soft);
-  border-color: var(--c-red);
+  border-color: color-mix(in srgb, var(--c-red) 45%, var(--border));
   color: var(--text);
 }
 </style>

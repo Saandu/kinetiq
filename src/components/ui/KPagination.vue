@@ -17,7 +17,7 @@ function go(page: number) {
 </script>
 
 <template>
-  <nav v-if="pageCount > 1" class="pager" :aria-label="t('a11y.mainNav')">
+  <nav v-if="pageCount > 1" class="pager" :aria-label="t('a11y.pagination')">
     <button
       class="pager__btn"
       :disabled="page === 1"

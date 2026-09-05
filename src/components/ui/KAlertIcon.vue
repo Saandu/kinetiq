@@ -107,18 +107,18 @@ const tone = computed(() => {
 }
 
 .alert--good {
-  color: var(--c-green);
+  color: var(--c-green-ink);
 }
 
 .alert--info {
-  color: var(--c-blue);
+  color: var(--c-blue-ink);
 }
 
 .alert--warn {
-  color: var(--c-amber);
+  color: var(--c-amber-ink);
 }
 
 .alert--bad {
-  color: var(--c-red);
+  color: var(--c-red-ink);
 }
 </style>

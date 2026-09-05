@@ -46,6 +46,7 @@ withDefaults(
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
 .tile--md .tile__value {

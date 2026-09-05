@@ -91,7 +91,7 @@ function confirmRemoval() {
           <KStatTile
             :label="t('metrics.alerts')"
             :value="String(fleet.summary.alerts)"
-            :hint="fleet.summary.alerts > 0 ? t('alert.2') : t('alert.0')"
+            :hint="t(`alert.${fleet.summary.highestAlert}`)"
           />
         </KCard>
       </div>
@@ -109,8 +109,13 @@ function confirmRemoval() {
           <li v-for="row in paginated" :key="row.machine.id">
             <KCard
               class="row"
-              interactive
-              :accent="row.status.online ? (row.status.alert >= 2 ? 'warn' : 'good') : 'bad'"
+              :accent="
+                !row.status.online || row.status.alert === 3
+                  ? 'bad'
+                  : row.status.alert === 2
+                    ? 'warn'
+                    : 'none'
+              "
             >
               <div class="row__grid">
                 <div class="row__id">
@@ -316,7 +321,7 @@ function confirmRemoval() {
 
 .row__remove:hover {
   background: var(--c-red-soft);
-  color: var(--c-red);
+  color: var(--c-red-ink);
 }
 
 .dialog__body {

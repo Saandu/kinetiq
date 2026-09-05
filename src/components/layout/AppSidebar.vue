@@ -121,7 +121,7 @@ function isActive(to: string) {
 .sidebar {
   position: fixed;
   inset: 0 auto 0 0;
-  z-index: 40;
+  z-index: var(--z-drawer);
   display: flex;
   flex-direction: column;
   width: var(--sidebar-w);
@@ -178,7 +178,7 @@ function isActive(to: string) {
   padding: 0 var(--s-2) var(--s-2);
   font-family: var(--font-mono);
   font-size: var(--t-sm);
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 
 .sidebar__link {
@@ -210,7 +210,7 @@ function isActive(to: string) {
 
 .sidebar__link--active {
   background: var(--c-green-soft);
-  color: var(--accent);
+  color: var(--accent-ink);
   font-weight: 600;
 }
 
@@ -240,7 +240,7 @@ function isActive(to: string) {
   padding: 0 var(--s-2);
   border-radius: var(--r-xs);
   background: var(--c-amber-soft);
-  color: var(--c-amber);
+  color: var(--c-amber-ink);
   font-size: var(--t-xs);
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -257,7 +257,7 @@ function isActive(to: string) {
 .scrim {
   position: fixed;
   inset: 0;
-  z-index: 35;
+  z-index: var(--z-scrim);
   background: rgba(12, 13, 16, 0.5);
 }
 
@@ -265,6 +265,7 @@ function isActive(to: string) {
   .sidebar {
     transform: translateX(-100%);
     box-shadow: var(--shadow-lg);
+    border-right: none;
     /* the drawer spans the full height, so it owns the safe areas itself */
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);

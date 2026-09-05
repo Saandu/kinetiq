@@ -74,11 +74,10 @@ withDefaults(
 .btn--primary {
   background: var(--accent);
   color: var(--text-on-accent);
-  box-shadow: var(--shadow-sm);
 }
 
 .btn--primary:hover:not(:disabled) {
-  background: #1fa967;
+  background: var(--accent-hover);
 }
 
 /* secondary — bordered, the workhorse */
@@ -86,7 +85,6 @@ withDefaults(
   background: var(--surface);
   border-color: var(--border-strong);
   color: var(--text);
-  box-shadow: var(--shadow-sm);
 }
 
 .btn--secondary:hover:not(:disabled) {
@@ -117,12 +115,12 @@ withDefaults(
 .btn--danger {
   background: transparent;
   border-color: var(--border-strong);
-  color: var(--c-red);
+  color: var(--c-red-ink);
 }
 
 .btn--danger:hover:not(:disabled) {
   background: var(--c-red-soft);
-  border-color: var(--c-red);
+  border-color: var(--c-red-ink);
 }
 
 .btn__label {

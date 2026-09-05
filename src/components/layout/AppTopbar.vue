@@ -43,7 +43,7 @@ const ui = useUiStore()
 .topbar {
   position: sticky;
   top: 0;
-  z-index: 30;
+  z-index: var(--z-sticky);
   display: flex;
   align-items: center;
   gap: var(--s-4);

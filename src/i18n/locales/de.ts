@@ -111,7 +111,7 @@ export default {
 
   dashboard: {
     title: 'Dashboard',
-    subtitle: 'Live-Zustand der gesamten Fertigung',
+    subtitle: 'Live-Zustand der fiktiven Demo-Produktionsfläche',
     machineId: 'ID',
     empty: {
       title: 'Keine Maschinen in der Liste',
@@ -218,6 +218,8 @@ export default {
     openMenu: 'Navigation öffnen',
     closeMenu: 'Navigation schließen',
     mainNav: 'Hauptnavigation',
+    pagination: 'Seitennavigation',
+    dialog: 'Dialogfenster',
     page: 'Seite {n}',
     previousPage: 'Vorherige Seite',
     nextPage: 'Nächste Seite',

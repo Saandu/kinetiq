@@ -217,6 +217,8 @@ export default {
     openMenu: 'Open navigation',
     closeMenu: 'Close navigation',
     mainNav: 'Main navigation',
+    pagination: 'Pagination',
+    dialog: 'Dialog',
     page: 'Page {n}',
     previousPage: 'Previous page',
     nextPage: 'Next page',

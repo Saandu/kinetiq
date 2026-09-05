@@ -14,7 +14,6 @@ const ui = useUiStore()
           :class="['toast', `toast--${toast.tone}`]"
           @click="ui.dismissToast(toast.id)"
         >
-          <span class="toast__rail" />
           {{ toast.message }}
         </div>
       </TransitionGroup>
@@ -27,7 +26,7 @@ const ui = useUiStore()
   position: fixed;
   top: var(--s-4);
   right: var(--s-4);
-  z-index: 200;
+  z-index: var(--z-toast);
   display: flex;
   flex-direction: column;
   gap: var(--s-2);
@@ -41,32 +40,26 @@ const ui = useUiStore()
   min-width: 240px;
   max-width: 360px;
   padding: var(--s-3) var(--s-4) var(--s-3) var(--s-4);
-  overflow: hidden;
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   border-radius: var(--r-md);
-  box-shadow: var(--shadow-lg);
   font-size: var(--t-base);
   cursor: pointer;
   pointer-events: auto;
 }
 
-.toast__rail {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 3px;
+.toast--good {
+  background: color-mix(in srgb, var(--c-green) 7%, var(--surface));
+  border-color: color-mix(in srgb, var(--c-green) 50%, var(--border));
 }
 
-.toast--good .toast__rail {
-  background: var(--c-green);
+.toast--bad {
+  background: color-mix(in srgb, var(--c-red) 7%, var(--surface));
+  border-color: color-mix(in srgb, var(--c-red) 50%, var(--border));
 }
 
-.toast--bad .toast__rail {
-  background: var(--c-red);
-}
-
-.toast--neutral .toast__rail {
-  background: var(--text-faint);
+.toast--neutral {
+  background: var(--surface);
 }
 
 .toast-enter-active,

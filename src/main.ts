@@ -17,7 +17,7 @@ app.use(i18n)
  *
  * Registered after pinia so the store is available, and before the router is
  * installed so the guard runs on the very first navigation -- otherwise a
- * a cold load of a machine route would render before anything is selected.
+ * cold load of a machine route would render before anything is selected.
  */
 router.beforeEach((to) => {
   const id = to.params.id

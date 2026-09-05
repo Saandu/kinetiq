@@ -1,17 +1,12 @@
 <script setup lang="ts">
-/**
- * Flat by default: a hairline border provides separation and interactive cards
- * gain a small amount of elevation on hover.
- */
 withDefaults(
   defineProps<{
     title?: string
     hint?: string
     padded?: boolean
-    interactive?: boolean
     accent?: 'none' | 'good' | 'bad' | 'warn'
   }>(),
-  { padded: true, interactive: false, accent: 'none' }
+  { padded: true, accent: 'none' }
 )
 </script>
 
@@ -19,7 +14,7 @@ withDefaults(
   <section
     :class="[
       'card',
-      { 'card--interactive': interactive, 'card--padded': padded },
+      { 'card--padded': padded },
       accent !== 'none' && `card--${accent}`,
     ]"
   >
@@ -40,10 +35,8 @@ withDefaults(
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  box-shadow: var(--shadow-sm);
   transition:
     border-color var(--dur) var(--ease),
-    box-shadow var(--dur) var(--ease),
     background-color var(--dur) var(--ease);
 }
 
@@ -51,33 +44,16 @@ withDefaults(
   padding: var(--s-5);
 }
 
-.card--interactive:hover {
-  border-color: var(--border-strong);
-  box-shadow: var(--shadow-md);
+.card--good {
+  border-color: color-mix(in srgb, var(--c-green) 45%, var(--border));
 }
 
-/* A narrow status rail adds emphasis without tinting the whole surface. */
-.card--good::before,
-.card--bad::before,
-.card--warn::before {
-  content: '';
-  position: absolute;
-  inset: auto auto 0 0;
-  top: 0;
-  width: 3px;
-  border-radius: var(--r-lg) 0 0 var(--r-lg);
+.card--bad {
+  border-color: color-mix(in srgb, var(--c-red) 45%, var(--border));
 }
 
-.card--good::before {
-  background: var(--c-green);
-}
-
-.card--bad::before {
-  background: var(--c-red);
-}
-
-.card--warn::before {
-  background: var(--c-amber);
+.card--warn {
+  border-color: color-mix(in srgb, var(--c-amber) 45%, var(--border));
 }
 
 .card__head {

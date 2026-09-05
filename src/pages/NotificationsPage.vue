@@ -53,7 +53,7 @@ function confirmDismiss() {
 
       <ul v-else class="feed">
         <li v-for="item in items" :key="item.id">
-          <KCard interactive class="note">
+          <KCard class="note">
             <div class="note__grid">
               <KAlertIcon :level="item.level" :size="20" />
 
@@ -213,11 +213,11 @@ function confirmDismiss() {
 }
 
 .note__value--good {
-  color: var(--c-green);
+  color: var(--c-green-ink);
 }
 
 .note__value--bad {
-  color: var(--c-red);
+  color: var(--c-red-ink);
 }
 
 .note__meta {
