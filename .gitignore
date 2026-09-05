@@ -18,4 +18,6 @@ Thumbs.db
 !.vscode/extensions.json
 
 *.log
+coverage/
+gha-creds-*.json
 npm-debug.log*

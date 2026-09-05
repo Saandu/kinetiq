@@ -24,7 +24,7 @@ const fleet = useFleetStore()
 const ui = useUiStore()
 const { formatDateTime, percent } = useFormat()
 
-const stateLabels = useStateLabels(toRef(fleet, 'selectedId'))
+const stateLabels = useStateLabels(toRef(fleet, 'selectedId'), toRef(fleet, 'revision'))
 
 const telemetry = computed(() => fleet.selectedTelemetry)
 const machine = computed(() => fleet.selectedMachine)
@@ -105,7 +105,7 @@ function windowLabel(w: FaultWindow) {
     <PageBody>
       <KCard v-if="!telemetry" :padded="false">
         <KEmptyState :title="t('machine.notFound.title')" :body="t('machine.notFound.body')">
-          <RouterLink to="/"><KButton variant="primary">{{ t('actions.back') }}</KButton></RouterLink>
+          <RouterLink to="/" class="recovery-link">{{ t('actions.back') }}</RouterLink>
         </KEmptyState>
       </KCard>
 

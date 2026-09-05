@@ -22,6 +22,9 @@ app.use(i18n)
 router.beforeEach((to) => {
   const id = to.params.id
   if (typeof id === 'string' && id) {
+    if (!useFleetStore().machines.some((machine) => machine.id === id)) {
+      return { name: 'not-found', params: { pathMatch: to.path.slice(1).split('/') }, replace: true }
+    }
     useFleetStore().select(id)
   }
 })

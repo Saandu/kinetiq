@@ -9,13 +9,15 @@ import KField from '@/components/ui/KField.vue'
 import KInput from '@/components/ui/KInput.vue'
 import { MAX_STATES } from '@/services/simulator'
 import { useFleetStore } from '@/stores/fleet'
-import { useSettingsStore } from '@/stores/settings'
+import { useSettingsStore, validThresholds } from '@/stores/settings'
+import { useRouter } from 'vue-router'
 import { useUiStore } from '@/stores/ui'
 
 const { t } = useI18n()
 const fleet = useFleetStore()
 const settings = useSettingsStore()
 const ui = useUiStore()
+const router = useRouter()
 
 settings.load(fleet.selectedId)
 watch(() => fleet.selectedId, (id) => settings.load(id))
@@ -28,16 +30,7 @@ const alertFields = [
   { key: 'criticalBelow' },
 ] as const
 
-const alertThresholdsValid = computed(() => {
-  const { watchBelow, warningBelow, criticalBelow } = settings.draft.alertThresholds
-  return (
-    [watchBelow, warningBelow, criticalBelow].every(
-      (value) => Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= 100
-    ) &&
-    Number(criticalBelow) < Number(warningBelow) &&
-    Number(warningBelow) < Number(watchBelow)
-  )
-})
+const alertThresholdsValid = computed(() => validThresholds(settings.draft.alertThresholds))
 
 function save(which: 'states' | 'alerts') {
   if (which === 'alerts' && !alertThresholdsValid.value) {
@@ -127,6 +120,7 @@ function save(which: 'states' | 'alerts') {
             () => {
               fleet.resetDemo()
               settings.reset()
+              router.push('/')
               ui.notify(t('demo.resetDone'), 'neutral')
             }
           "

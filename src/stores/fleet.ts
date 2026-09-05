@@ -24,6 +24,10 @@ export const useFleetStore = defineStore('fleet', () => {
   /** Bumped when local overrides change, to invalidate the computeds. */
   const revision = ref(0)
 
+  function refresh() {
+    revision.value++
+  }
+
   let timer: number | null = null
   let subscribers = 0
 
@@ -171,6 +175,8 @@ export const useFleetStore = defineStore('fleet', () => {
   return {
     now,
     selectedId,
+    revision,
+    refresh,
     machines,
     statuses,
     summary,

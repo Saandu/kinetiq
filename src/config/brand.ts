@@ -9,7 +9,7 @@ export const brand = {
   /** Used in <title> and the about panel. */
   tagline: 'Condition monitoring for industrial machines',
   /** Portfolio attribution shown in the demo banner. */
-  repoUrl: '',
+  repoUrl: 'https://github.com/Saandu/kinetiq',
 } as const
 
 /**

@@ -21,7 +21,7 @@ const fleet = useFleetStore()
 const ui = useUiStore()
 const { formatDateTime, formatRelative, percent } = useFormat()
 
-const stateLabels = useStateLabels(toRef(fleet, 'selectedId'))
+const stateLabels = useStateLabels(toRef(fleet, 'selectedId'), toRef(fleet, 'revision'))
 
 const detail = ref<MachineNotification | null>(null)
 const pendingDismiss = ref<string | null>(null)

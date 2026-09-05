@@ -196,7 +196,7 @@ export default {
     alertSettings: 'Alert thresholds',
     alertSettingsHint: 'Fictional demo values, expressed as availability percentages.',
     saved: 'Settings saved',
-    thresholdsValid: 'Thresholds are valid and apply to this machine.',
+    thresholdsValid: 'Valid thresholds. Save to apply them to this machine.',
     invalidThresholds:
       'Use values from 0 to 100, ordered critical below warning below watch.',
     fields: {
@@ -214,6 +214,8 @@ export default {
   },
 
   a11y: {
+    skipContent: 'Skip to main content',
+    viewSource: 'View source on GitHub',
     openMenu: 'Open navigation',
     closeMenu: 'Close navigation',
     mainNav: 'Main navigation',

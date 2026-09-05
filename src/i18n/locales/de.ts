@@ -197,7 +197,7 @@ export default {
     alertSettings: 'Alarmschwellen',
     alertSettingsHint: 'Fiktive Demowerte als Verfügbarkeitsprozente.',
     saved: 'Einstellungen gespeichert',
-    thresholdsValid: 'Die Schwellenwerte sind gültig und gelten für diese Maschine.',
+    thresholdsValid: 'Gültige Schwellenwerte. Speichern, um sie auf diese Maschine anzuwenden.',
     invalidThresholds:
       'Werte von 0 bis 100 verwenden: kritisch kleiner als Warnung, Warnung kleiner als Beobachten.',
     fields: {
@@ -215,6 +215,8 @@ export default {
   },
 
   a11y: {
+    skipContent: 'Zum Hauptinhalt springen',
+    viewSource: 'Quellcode auf GitHub ansehen',
     openMenu: 'Navigation öffnen',
     closeMenu: 'Navigation schließen',
     mainNav: 'Hauptnavigation',

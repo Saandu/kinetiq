@@ -110,6 +110,36 @@ h4 {
 
 /* ---- shared utility --------------------------------------------------- */
 
+.skip-link {
+  position: fixed;
+  top: var(--s-2);
+  left: var(--s-2);
+  z-index: var(--z-toast);
+  padding: var(--s-3) var(--s-4);
+  background: var(--surface);
+  color: var(--text);
+  transform: translateY(-150%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.recovery-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--s-2) var(--s-4);
+  border-radius: var(--r-sm);
+  background: var(--accent);
+  color: var(--text-on-accent);
+  font-weight: 550;
+}
+
+.recovery-link:hover {
+  background: var(--accent-hover);
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

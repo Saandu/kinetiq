@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RouterView } from 'vue-router'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import KToaster from '@/components/ui/KToaster.vue'
@@ -8,6 +9,7 @@ import { useUiStore } from '@/stores/ui'
 
 const ui = useUiStore()
 const fleet = useFleetStore()
+const { t } = useI18n()
 
 ui.hydrate()
 
@@ -28,14 +30,15 @@ onUnmounted(() => {
 
 <template>
   <div class="shell">
+    <a class="skip-link" href="#main-content" :inert="ui.sidebarOpen ? true : undefined">{{ t('a11y.skipContent') }}</a>
     <AppSidebar />
-    <div class="shell__main">
+    <main id="main-content" class="shell__main" tabindex="-1" :inert="ui.sidebarOpen ? true : undefined">
       <RouterView v-slot="{ Component }">
         <Transition name="route-fade" mode="out-in">
           <component :is="Component" />
         </Transition>
       </RouterView>
-    </div>
+    </main>
     <KToaster />
   </div>
 </template>

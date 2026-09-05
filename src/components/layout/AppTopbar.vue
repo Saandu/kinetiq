@@ -13,6 +13,8 @@ const ui = useUiStore()
   <header class="topbar">
     <button
       class="topbar__burger"
+      aria-controls="app-navigation"
+      :aria-expanded="ui.sidebarOpen"
       :aria-label="ui.sidebarOpen ? t('a11y.closeMenu') : t('a11y.openMenu')"
       @click="ui.toggleSidebar()"
     >

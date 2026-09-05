@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 import AppPrefs from './AppPrefs.vue'
@@ -12,6 +12,45 @@ const { t } = useI18n()
 const route = useRoute()
 const fleet = useFleetStore()
 const ui = useUiStore()
+const panel = ref<HTMLElement | null>(null)
+let previousFocus: HTMLElement | null = null
+
+watch(() => ui.sidebarOpen, async (open) => {
+  if (open) {
+    previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    await nextTick()
+    if (ui.sidebarOpen) panel.value?.querySelector<HTMLElement>('button')?.focus()
+  } else {
+    await nextTick()
+    if (ui.isMobile) {
+      const target = previousFocus?.isConnected ? previousFocus : document.querySelector<HTMLElement>('.topbar__burger')
+      target?.focus()
+    }
+    previousFocus = null
+  }
+})
+
+function onDrawerKey(event: KeyboardEvent) {
+  if (!ui.sidebarOpen || !ui.isMobile) return
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    ui.closeSidebar()
+  }
+  if (event.key !== 'Tab' || !panel.value) return
+  const items = Array.from(panel.value.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled])'))
+    .filter((item) => item.getClientRects().length > 0)
+  const first = items[0]
+  const last = items[items.length - 1]
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault()
+    last?.focus()
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault()
+    first?.focus()
+  }
+}
+
+onBeforeUnmount(() => ui.closeSidebar())
 
 /** The machine-scoped pages are meaningless until a machine is chosen. */
 const machineLinks = computed(() => {
@@ -33,7 +72,18 @@ function isActive(to: string) {
 </script>
 
 <template>
-  <aside class="sidebar" :class="{ 'sidebar--open': ui.sidebarOpen }">
+  <aside
+    id="app-navigation"
+    ref="panel"
+    class="sidebar"
+    :class="{ 'sidebar--open': ui.sidebarOpen }"
+    :inert="ui.isMobile && !ui.sidebarOpen ? true : undefined"
+    :role="ui.isMobile && ui.sidebarOpen ? 'dialog' : undefined"
+    :aria-modal="ui.isMobile && ui.sidebarOpen ? true : undefined"
+    :aria-label="t('a11y.mainNav')"
+    @keydown="onDrawerKey"
+  >
+    <button v-if="ui.isMobile" class="sidebar__close" :aria-label="t('a11y.closeMenu')" @click="ui.closeSidebar()">×</button>
     <RouterLink to="/" class="sidebar__brand" @click="ui.closeSidebar()">
       <KinetiqMark :size="26" />
       <span class="sidebar__brandtext">
@@ -111,6 +161,7 @@ function isActive(to: string) {
 
       <span class="sidebar__demo">{{ t('demo.badge') }}</span>
       <p class="sidebar__note">{{ t('demo.notice') }}</p>
+      <a class="sidebar__source" :href="brand.repoUrl" target="_blank" rel="noopener noreferrer">{{ t('a11y.viewSource') }} ↗</a>
     </div>
   </aside>
 
@@ -118,6 +169,17 @@ function isActive(to: string) {
 </template>
 
 <style scoped>
+.sidebar__close {
+  position: absolute;
+  top: var(--s-2);
+  right: var(--s-2);
+  width: 44px;
+  height: 44px;
+  font-size: var(--t-xl);
+  background: var(--surface);
+  border-radius: var(--r-sm);
+}
+
 .sidebar {
   position: fixed;
   inset: 0 auto 0 0;
@@ -254,6 +316,16 @@ function isActive(to: string) {
   color: var(--text-faint);
 }
 
+.sidebar__source {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: var(--t-sm);
+  color: var(--accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .scrim {
   position: fixed;
   inset: 0;
@@ -263,6 +335,7 @@ function isActive(to: string) {
 
 @media (max-width: 900px) {
   .sidebar {
+    visibility: hidden;
     transform: translateX(-100%);
     box-shadow: var(--shadow-lg);
     border-right: none;
@@ -273,6 +346,7 @@ function isActive(to: string) {
   }
 
   .sidebar--open {
+    visibility: visible;
     transform: translateX(0);
   }
 }

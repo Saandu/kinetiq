@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { onScopeDispose, ref } from 'vue'
 import { readRaw, writeRaw } from '@/services/storage'
 import { lockScroll, unlockScroll } from '@/composables/useScrollLock'
 import { resolveInitialLocale, setI18nLocale, type AppLocale } from '@/i18n'
@@ -25,6 +25,19 @@ export const useUiStore = defineStore('ui', () => {
   const theme = ref<Theme>(resolveInitialTheme())
   const locale = ref<AppLocale>(resolveInitialLocale())
   const sidebarOpen = ref(false)
+  const drawerQuery = window.matchMedia('(max-width: 900px)')
+  const isMobile = ref(drawerQuery.matches)
+  let drawerLocked = false
+
+  function onBreakpointChange() {
+    isMobile.value = drawerQuery.matches
+    closeSidebar()
+  }
+  drawerQuery.addEventListener('change', onBreakpointChange)
+  onScopeDispose(() => {
+    drawerQuery.removeEventListener('change', onBreakpointChange)
+    if (drawerLocked) unlockScroll()
+  })
   const toasts = ref<Toast[]>([])
 
   let toastSeq = 0
@@ -53,17 +66,17 @@ export const useUiStore = defineStore('ui', () => {
     setLocale(locale.value === 'en' ? 'de' : 'en')
   }
 
-  /** The sidebar only overlays content (and so only locks scroll) on mobile. */
-  function isDrawer() {
-    return typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches
-  }
-
   function setSidebar(open: boolean) {
+    open = open && isMobile.value
     if (open === sidebarOpen.value) return
     sidebarOpen.value = open
-    if (!isDrawer()) return
-    if (open) lockScroll()
-    else unlockScroll()
+    if (open) {
+      lockScroll()
+      drawerLocked = true
+    } else if (drawerLocked) {
+      unlockScroll()
+      drawerLocked = false
+    }
   }
 
   function toggleSidebar() {
@@ -94,6 +107,7 @@ export const useUiStore = defineStore('ui', () => {
     theme,
     locale,
     sidebarOpen,
+    isMobile,
     toasts,
     setTheme,
     toggleTheme,
