@@ -1,5 +1,7 @@
 # Kinetiq
 
+[![CI / CD](https://github.com/Saandu/kinetiq/actions/workflows/verify.yml/badge.svg)](https://github.com/Saandu/kinetiq/actions/workflows/verify.yml)
+
 Kinetiq is a browser-based condition-monitoring demo that shows which fictional factory machines need attention and when.
 
 **Live demo:** [https://kinetiq-dashboard.web.app](https://kinetiq-dashboard.web.app)
@@ -165,6 +167,14 @@ pull requests cannot deploy. See [deployment details](docs/DEPLOYMENT.md).
 The tests cover independent settings saves, immediate severity updates, invalid
 thresholds, deterministic data, persistence and reset, blocked/corrupt storage,
 shared timer cleanup, hidden-tab behavior and mobile drawer focus/scroll recovery.
+
+They also cover the interface primitives, because the accessibility claims above
+are the kind that quietly stop being true: that a field label is wired to the
+control in its slot, that the switch is a `role="switch"` with `aria-checked`
+rather than a styled div, that each severity draws its own *shape* and not only
+its own colour, and that a dialog names itself, takes focus in, keeps Tab
+inside, closes on Escape and hands focus back to whatever opened it.
+
 See [the test suite](tests) and [the browser checklist](docs/VERIFICATION.md).
 These checks are not a claim of exhaustive browser or accessibility coverage.
 
@@ -174,7 +184,7 @@ These checks are not a claim of exhaustive browser or accessibility coverage.
 | [`simulator.ts`](src/services/simulator.ts) | Stable generated values and deliberate demo profiles |
 | [`fleet.ts`](src/stores/fleet.ts) | Shared reactive clock, lifecycle and derived fleet status |
 | [`settings.ts`](src/stores/settings.ts) | Draft state, per-panel saves and validation |
-| [`components/ui`](src/components/ui) | 14 reusable interface primitives |
+| [`components/ui`](src/components/ui) | 14 reusable interface primitives, covered by [`components.test.ts`](tests/components.test.ts) |
 | [`tokens.css`](src/styles/tokens.css) | Shared typography, spacing, color and theme tokens |
 
 ```mermaid
