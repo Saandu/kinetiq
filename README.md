@@ -37,7 +37,7 @@ German manufacturer and deployed inside their plant.
 
 That system read live sensor telemetry from real equipment out of an InfluxDB
 time-series database, and published operator commands back to the factory over
-MQTT — maintenance mode, fault logging, and the training hyperparameters of the
+MQTT - maintenance mode, fault logging, and the training hyperparameters of the
 machine-learning model behind it. That made it a control surface rather than a
 read-only report. Getting MQTT to work from a browser was the hardest part: the
 protocol expects a raw TCP socket that browsers do not have, so it had to be
@@ -45,7 +45,7 @@ carried over WebSocket, with the Node-only client library polyfilled for the
 bundler and the broker address resolved at runtime.
 
 That codebase is private and client-owned. This repository shares none of its
-code or data — it is a separate 2026 rebuild with fictional machines.
+code or data - it is a separate 2026 rebuild with fictional machines.
 
 | | Paid client work, 2023 | Public portfolio rebuild, 2026 |
 |---|---|---|
