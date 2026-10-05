@@ -38,3 +38,7 @@ Use PostgreSQL 18.6 consistently in local development, integration tests and Clo
 ## Verification boundary
 
 Only frontend/runtime setup is executable at the beginning of Phase 0. Python checks start when a Python package exists; image builds require Docker; Helm and CDK gates start when their source exists. Missing tools or failed checks must be reported, not treated as passing. Cloud provisioning still requires explicit session confirmation under the plan's working rules.
+
+## Tested compiler exception
+
+TypeScript 7.0.2 is the registry's newest stable release, but `vue-tsc` 3.3.12 fails with `ERR_PACKAGE_PATH_NOT_EXPORTED` for `typescript/lib/tsc`. Pin TypeScript 6.0.3 (the latest 6.x maintenance release) for the shared toolchain until the Vue checker supports the native compiler. Remove deprecated `baseUrl`; explicit `paths` already resolve relative to the configuration file. This exception preserves Vue template type checking rather than bypassing it.
