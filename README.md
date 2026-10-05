@@ -134,7 +134,7 @@ also expressed with icon shape and text, so color is never the only signal.
 
 ## Run locally
 
-Recommended: **Node.js 24.15+ (24.x)** and npm. `.nvmrc` selects Node 24.
+Recommended: **Node.js 24.21.0 LTS (24.x)** and npm. `.nvmrc` selects Node 24.
 The complete supported version range, including test tooling, is in `package.json`.
 
 ```bash
@@ -150,11 +150,13 @@ Open [http://localhost:3100](http://localhost:3100).
 npm run typecheck  # TypeScript and Vue checks
 npm test           # behavior and regression tests
 npm run verify     # tests, type checks and production build
-npm run build      # type checks and production build in dist/
+npm run build      # type checks and production build in apps/web/dist/
 npm run preview    # serve the built application locally
 ```
 
-No environment file or Firebase account is required to run locally.
+No environment file or Firebase account is required to run the frontend locally.
+
+The Vue app lives in `apps/web`. Run npm commands from the repository root: npm workspaces shares one lockfile across the frontend, shared packages and backend services. Backend packages are added in Phase 0; the hosted demo keeps its local source until Phase 2.
 
 ## Verification and source tour
 
@@ -175,17 +177,17 @@ rather than a styled div, that each severity draws its own *shape* and not only
 its own colour, and that a dialog names itself, takes focus in, keeps Tab
 inside, closes on Escape and hands focus back to whatever opened it.
 
-See [the test suite](tests) and [the browser checklist](docs/VERIFICATION.md).
+See [the test suite](apps/web/tests) and [the browser checklist](docs/VERIFICATION.md).
 These checks are not a claim of exhaustive browser or accessibility coverage.
 
 | Start here | What to inspect |
 |---|---|
-| [`telemetryService.ts`](src/services/telemetryService.ts) | Data contract, local adapter and stored-data normalization |
-| [`simulator.ts`](src/services/simulator.ts) | Stable generated values and deliberate demo profiles |
-| [`fleet.ts`](src/stores/fleet.ts) | Shared reactive clock, lifecycle and derived fleet status |
-| [`settings.ts`](src/stores/settings.ts) | Draft state, per-panel saves and validation |
-| [`components/ui`](src/components/ui) | 14 reusable interface primitives, covered by [`components.test.ts`](tests/components.test.ts) |
-| [`tokens.css`](src/styles/tokens.css) | Shared typography, spacing, color and theme tokens |
+| [`telemetryService.ts`](apps/web/src/services/telemetryService.ts) | Data contract, local adapter and stored-data normalization |
+| [`simulator.ts`](apps/web/src/services/simulator.ts) | Stable generated values and deliberate demo profiles |
+| [`fleet.ts`](apps/web/src/stores/fleet.ts) | Shared reactive clock, lifecycle and derived fleet status |
+| [`settings.ts`](apps/web/src/stores/settings.ts) | Draft state, per-panel saves and validation |
+| [`components/ui`](apps/web/src/components/ui) | 14 reusable interface primitives, covered by [`components.test.ts`](apps/web/tests/components.test.ts) |
+| [`tokens.css`](apps/web/src/styles/tokens.css) | Shared typography, spacing, color and theme tokens |
 
 ```mermaid
 flowchart LR

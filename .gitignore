@@ -21,3 +21,18 @@ Thumbs.db
 coverage/
 gha-creds-*.json
 npm-debug.log*
+
+# Local tools and future service secrets/state
+.tools/
+.venv/
+__pycache__/
+*.pyc
+*.pem
+*.key
+*.crt
+*.p12
+*.kubeconfig
+kubeconfig*
+*.tfstate
+*.tfstate.*
+.terraform/

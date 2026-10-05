@@ -16,15 +16,15 @@ Hosting site: `kinetiq-dashboard` (selected in `firebase.json`)
 
 1. The `verify` job runs `npm ci`, `npm run verify` and the production dependency
    audit. A failure stops delivery.
-2. On a `main` push, it uploads `dist/` as an artifact named with the commit SHA.
+2. On a `main` push, it uploads `apps/web/dist/` as an artifact named with the commit SHA.
 3. The `deploy` job downloads that artifact without rebuilding it. The Firebase
-   CLI version is pinned to `15.9.0`.
+   CLI version is pinned to `15.32.1`.
 4. The job checks the current `main` SHA before authenticating. If a newer commit
    exists, this older deployment is skipped. Main-branch runs are serialized so
    an active Firebase deployment is not canceled halfway through.
 5. Google Workload Identity Federation supplies short-lived credentials. The
    Firebase CLI deploys Hosting only, with the commit SHA as the release message.
-6. The smoke check compares published HTML and initial assets against `dist/`,
+6. The smoke check compares published HTML and initial assets against `apps/web/dist/`,
    checks a deep-link fallback and the Content Security Policy, then records the
    deployment URL and commit in the Actions summary. A mismatch fails the job.
 

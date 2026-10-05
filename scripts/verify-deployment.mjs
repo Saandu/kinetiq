@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { setTimeout } from 'node:timers/promises'
 
 const origin = 'https://kinetiq-dashboard.web.app'
-const expected = await readFile(new URL('../dist/index.html', import.meta.url), 'utf8')
+const expected = await readFile(new URL('../apps/web/dist/index.html', import.meta.url), 'utf8')
 const paths = ['/', '/machines/DEMO-CNC-01/settings']
 const assets = [...new Set([...expected.matchAll(/(?:src|href)="\/(assets\/[^"?#]+)"/g)].map((match) => match[1]))]
 if (!assets.length) throw new Error('No compiled assets found in the verified build')
@@ -19,7 +19,7 @@ async function verify() {
   }
   for (const asset of assets) {
     const response = await fetch(`${origin}/${asset}`, { signal: AbortSignal.timeout(15_000) })
-    const expectedAsset = await readFile(new URL(`../dist/${asset}`, import.meta.url))
+    const expectedAsset = await readFile(new URL(`../apps/web/dist/${asset}`, import.meta.url))
     if (!response.ok || !Buffer.from(await response.arrayBuffer()).equals(expectedAsset)) {
       throw new Error(`Deployed asset does not match the verified build: ${asset}`)
     }

@@ -6,32 +6,25 @@
   "type": "module",
   "description": "Kinetiq - condition monitoring dashboard for industrial machines",
   "engines": {
-    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
+    "node": "^24.21.0"
   },
+  "packageManager": "npm@11.19.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
-    "build:only": "vite build",
-    "preview": "vite preview",
-    "typecheck": "vue-tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "verify": "npm run test && npm run build"
-  },
-  "dependencies": {
-    "pinia": "^4.0.3",
-    "vue": "^3.5.41",
-    "vue-i18n": "^11.4.8",
-    "vue-router": "^5.2.0"
+    "dev": "npm run dev --workspace @kinetiq/web",
+    "build": "npm run build --workspace @kinetiq/web",
+    "build:only": "npm run build:only --workspace @kinetiq/web",
+    "preview": "npm run preview --workspace @kinetiq/web",
+    "typecheck": "npm run typecheck --workspace @kinetiq/web",
+    "test": "npm run test --workspace @kinetiq/web",
+    "test:watch": "npm run test:watch --workspace @kinetiq/web",
+    "verify": "npm run verify --workspace @kinetiq/web"
   },
   "devDependencies": {
-    "@types/node": "^26.2.0",
-    "@vitejs/plugin-vue": "^6.0.1",
-    "@vue/test-utils": "^2.5.0",
-    "jsdom": "^30.0.1",
-    "typescript": "^5.9.3",
-    "vite": "^8.2.1",
-    "vitest": "^5.0.0",
-    "vue-tsc": "^3.1.1"
+    "@types/node": "24.19.1"
   }
 }
