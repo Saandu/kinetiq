@@ -59,7 +59,7 @@ async function save(which: 'states' | 'alerts') {
       <!-- state labels -->
       <KCard :title="t('settings.stateDescription')" :hint="t('settings.stateDescriptionHint')">
         <template #actions>
-          <KButton size="sm" variant="primary" :disabled="!settings.ready || settings.loading || settings.saving" @click="save('states')">
+          <KButton size="sm" variant="primary" :disabled="fleet.readOnly || !settings.ready || settings.loading || settings.saving" @click="save('states')">
             {{ t('actions.save') }}
           </KButton>
         </template>
@@ -74,7 +74,7 @@ async function save(which: 'states' | 'alerts') {
             <KInput
               :id="id"
               v-model="settings.draft.stateNames[i]"
-              :disabled="!settings.ready || settings.loading || settings.saving"
+              :disabled="fleet.readOnly || !settings.ready || settings.loading || settings.saving"
               :placeholder="t('states.default.' + (i + 1))"
             />
           </KField>
@@ -85,7 +85,7 @@ async function save(which: 'states' | 'alerts') {
       <!-- alert thresholds -->
       <KCard :title="t('settings.alertSettings')" :hint="t('settings.alertSettingsHint')">
         <template #actions>
-          <KButton size="sm" variant="primary" :disabled="!settings.ready || settings.loading || settings.saving" @click="save('alerts')">
+          <KButton size="sm" variant="primary" :disabled="fleet.readOnly || !settings.ready || settings.loading || settings.saving" @click="save('alerts')">
             {{ t('actions.save') }}
           </KButton>
         </template>
@@ -100,7 +100,7 @@ async function save(which: 'states' | 'alerts') {
             <KInput
               :id="id"
               v-model.number="settings.draft.alertThresholds[field.key]"
-              :disabled="!settings.ready || settings.loading || settings.saving"
+              :disabled="fleet.readOnly || !settings.ready || settings.loading || settings.saving"
               type="number"
               min="0"
               max="100"
@@ -120,8 +120,9 @@ async function save(which: 'states' | 'alerts') {
       </KCard>
 
       <!-- demo controls -->
-      <KCard :title="t('demo.badge')" :hint="t('demo.notice')">
+      <KCard :title="t('demo.badge')" :hint="t(fleet.readOnly ? 'demo.backendNotice' : 'demo.notice')">
         <KButton
+          :disabled="fleet.readOnly"
           @click="
             async () => {
               if (!await fleet.resetDemo()) return

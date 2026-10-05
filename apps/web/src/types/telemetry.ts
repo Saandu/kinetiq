@@ -1,3 +1,4 @@
+import type { ApiMachineStatus, ApiMachineTelemetry, ApiMachineNotification } from '@kinetiq/contracts'
 /** Severity ladder used for both machine alerts and notifications. */
 export type AlertLevel = 0 | 1 | 2 | 3
 
@@ -44,13 +45,7 @@ export interface Machine {
 }
 
 /** The rolled-up row shown on the dashboard list. */
-export interface MachineStatus {
-  id: string
-  online: boolean
-  /** 0..100 */
-  availability: number
-  alert: AlertLevel
-}
+export type MachineStatus = ApiMachineStatus
 
 /** One entry in a machine's operating-state distribution. */
 export interface StateSlice {
@@ -71,33 +66,7 @@ export interface FaultWindow {
 }
 
 /** Everything the machine detail view renders. */
-export interface MachineTelemetry {
-  id: string
-  online: boolean
-  /** 0..100 */
-  availability: number
-  /** 0..100 */
-  anomalyScore: number
-  /** 0..1 */
-  confidence: number
-  /** how many of the 8 state slots this machine actually uses */
-  activeStates: number
-  states: StateSlice[]
-  /** index of the state the machine is in right now */
-  currentState: number
-  maintenance: {
-    previous: FaultWindow
-    current: FaultWindow
-    next: FaultWindow
-  }
-  faults: {
-    previous: FaultWindow
-    current: FaultWindow
-    next: FaultWindow
-  }
-  maintenanceMode: boolean
-  monitoringEnabled: boolean
-}
+export type MachineTelemetry = ApiMachineTelemetry
 
 /** A rich-text run inside a notification message. */
 export interface NotificationRun {
@@ -107,27 +76,7 @@ export interface NotificationRun {
   tone?: 'good' | 'bad' | 'neutral'
 }
 
-export interface MachineNotification {
-  id: string
-  machineId: string
-  /** epoch ms */
-  at: number
-  level: AlertLevel
-  /** i18n key for the message template */
-  messageKey: string
-  /** interpolated into the message */
-  value: string
-  tone: 'good' | 'bad'
-  /** snapshot of the machine at the moment the notification fired */
-  snapshot: {
-    availability: number
-    anomalyScore: number
-    confidence: number
-    activeStates: number
-    states: StateSlice[]
-    interval: string
-  }
-}
+export type MachineNotification = ApiMachineNotification
 
 /** Per-machine configuration stored only in this browser. */
 export interface MachineSettings {

@@ -25,6 +25,7 @@ import {
   machineTelemetry,
 } from './simulator'
 import { readJson, writeJson } from './storage'
+import { HttpTelemetrySource } from './httpTelemetrySource'
 
 /** Local, user-authored state that overlays the simulated feed. */
 interface Overrides {
@@ -58,6 +59,7 @@ export function defaultSettings(): MachineSettings {
 }
 
 export interface TelemetrySource {
+  readonly readOnly?: boolean
   listMachines(): Promise<Machine[]>
   listStatuses(now?: number): Promise<MachineStatus[]>
   getTelemetry(id: string, now?: number): Promise<MachineTelemetry | null>
@@ -187,7 +189,13 @@ class LocalTelemetrySource implements TelemetrySource {
   }
 }
 
-let source: TelemetrySource = new LocalTelemetrySource()
+function configuredSource(): TelemetrySource {
+  const mode = import.meta.env.VITE_TELEMETRY_SOURCE ?? 'local'
+  if (mode === 'api') return new HttpTelemetrySource()
+  if (mode !== 'local') throw new Error('Unknown telemetry source')
+  return new LocalTelemetrySource()
+}
+let source: TelemetrySource = configuredSource()
 
 /** Replace the source without coupling pages or stores to an implementation. */
 export function setTelemetrySource(next: TelemetrySource): void {
@@ -200,7 +208,7 @@ export function telemetry(): TelemetrySource {
 
 /** Re-reads overrides from storage -- used after "reset demo". */
 export function reloadTelemetrySource(): void {
-  source = new LocalTelemetrySource()
+  source = configuredSource()
 }
 
 function stringArray(value: unknown): string[] {

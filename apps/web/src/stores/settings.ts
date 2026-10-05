@@ -40,7 +40,7 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   async function save(panel: 'states' | 'alerts'): Promise<boolean> {
-    if (!machineId.value || !ready.value || loading.value || saving.value || disposed) return false
+    if (!machineId.value || !ready.value || loading.value || saving.value || disposed || source().readOnly) return false
     if (panel === 'alerts' && !validThresholds(draft.value.alertThresholds)) return false
     const id = machineId.value
     const current = request

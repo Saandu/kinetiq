@@ -28,6 +28,7 @@ export const useFleetStore = defineStore('fleet', () => {
   const writing = ref(false)
   const loading = computed(() => fleetLoading.value || selectedLoading.value)
   const error = computed(() => fleetError.value || selectedError.value || writeError.value)
+  const readOnly = computed(() => { void revision.value; return source().readOnly === true })
   let fleetRequest = 0
   let selectedRequest = 0
   let disposed = false
@@ -36,12 +37,12 @@ export const useFleetStore = defineStore('fleet', () => {
     const request = ++fleetRequest
     const adapter = source()
     fleetLoading.value = true
-    fleetError.value = false
     try {
       const [roster, rows] = await Promise.all([adapter.listMachines(), adapter.listStatuses(now.value)])
       if (disposed || request !== fleetRequest || adapter !== source()) return false
       machines.value = roster
       statuses.value = rows
+      fleetError.value = false
       loaded.value = true
       if (selectedId.value && !roster.some((machine) => machine.id === selectedId.value)) {
         void select('')
@@ -66,8 +67,8 @@ export const useFleetStore = defineStore('fleet', () => {
     const request = ++selectedRequest
     const id = selectedId.value
     const adapter = source()
-    selectedError.value = false
     if (!id) {
+      selectedError.value = false
       clearSelectionData()
       selectedLoading.value = false
       return true
@@ -83,6 +84,7 @@ export const useFleetStore = defineStore('fleet', () => {
       selectedNotifications.value = notifications
       maintenanceEntries.value = entries
       selectedSettings.value = settings
+      selectedError.value = false
       return true
     } catch {
       if (!disposed && request === selectedRequest) selectedError.value = true
@@ -150,19 +152,20 @@ export const useFleetStore = defineStore('fleet', () => {
 
   const summary = computed(() => {
     const list = statuses.value
+    const measured = list.filter((row) => row.availability !== null)
     return {
       total: list.length,
       online: list.filter((s) => s.online).length,
       alerts: list.filter((s) => s.alert >= 2).length,
       highestAlert: list.reduce<AlertLevel>((highest, s) => s.alert > highest ? s.alert : highest, 0),
-      avgAvailability: list.length ? list.reduce((sum, s) => sum + s.availability, 0) / list.length : 0,
+      avgAvailability: measured.length ? measured.reduce((sum, s) => sum + s.availability!, 0) / measured.length : null,
     }
   })
   const selectedMachine = computed(() => machines.value.find((m) => m.id === selectedId.value) ?? null)
 
   /** No optimistic writes: refresh only after persistence succeeds. */
   async function mutate(action: () => Promise<unknown>): Promise<boolean> {
-    if (writing.value || disposed) return false
+    if (writing.value || disposed || readOnly.value) return false
     writing.value = true
     writeError.value = false
     try {
@@ -203,7 +206,7 @@ export const useFleetStore = defineStore('fleet', () => {
   }
 
   return {
-    now, selectedId, revision, machines, statuses, summary, selectedMachine,
+    now, selectedId, revision, machines, statuses, summary, selectedMachine, readOnly,
     selectedTelemetry, selectedNotifications, maintenanceEntries, selectedSettings,
     fleetLoading, selectedLoading, loading, loaded, fleetError, selectedError,
     writeError, error, writing, loadFleet, loadSelected, refresh, subscribe, select,

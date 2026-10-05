@@ -34,7 +34,7 @@ const rows = computed(() =>
     status: fleet.statuses.find((s) => s.id === machine.id) ?? {
       id: machine.id,
       online: false,
-      availability: 0,
+      availability: null,
       alert: 3 as const,
     },
   }))
@@ -82,14 +82,14 @@ async function confirmRemoval() {
         </KCard>
         <KCard>
           <KStatTile
-            :label="t('metrics.avgAvailability')"
+            :label="t(fleet.readOnly ? 'metrics.sampleAvailability' : 'metrics.avgAvailability')"
             :value="percent(fleet.summary.avgAvailability, 1)"
-            :percent="fleet.summary.avgAvailability"
+            :percent="fleet.summary.avgAvailability ?? undefined"
           />
         </KCard>
         <KCard>
           <KStatTile
-            :label="t('metrics.alerts')"
+            :label="t(fleet.readOnly ? 'metrics.atRisk' : 'metrics.alerts')"
             :value="String(fleet.summary.alerts)"
             :hint="t(`alert.${fleet.summary.highestAlert}`)"
           />
@@ -98,7 +98,7 @@ async function confirmRemoval() {
 
       <KCard v-if="!rows.length" :padded="false">
         <KEmptyState :title="t('dashboard.empty.title')" :body="t('dashboard.empty.body')">
-          <KButton variant="primary" :disabled="fleet.writing" @click="fleet.restoreMachines()">
+          <KButton variant="primary" :disabled="fleet.readOnly || fleet.writing" @click="fleet.restoreMachines()">
             {{ t('dashboard.empty.action') }}
           </KButton>
         </KEmptyState>
@@ -128,7 +128,7 @@ async function confirmRemoval() {
 
                 <div class="row__status">
                   <KBadge :tone="row.status.online ? 'good' : 'bad'" dot>
-                    {{ row.status.online ? t('status.online') : t('status.offline') }}
+                    {{ row.status.samples === 0 ? t('data.waiting') : row.status.online ? t('status.online') : t('status.offline') }}
                   </KBadge>
                 </div>
 
@@ -137,7 +137,7 @@ async function confirmRemoval() {
                     <span class="row__label">{{ t('metrics.availability') }}</span>
                     <span class="row__pct tnum">{{ percent(row.status.availability, 1) }}</span>
                   </div>
-                  <KMeter :value="row.status.availability" />
+                  <KMeter v-if="row.status.availability !== null" :value="row.status.availability" />
                 </div>
 
                 <div class="row__alert">
@@ -150,6 +150,7 @@ async function confirmRemoval() {
                     {{ t('actions.details') }}
                   </KButton>
                   <button
+                    v-if="!fleet.readOnly"
                     class="row__remove"
                     :aria-label="t('actions.remove')"
                     @click="pendingRemoval = row.machine.id"

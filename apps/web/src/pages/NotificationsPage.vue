@@ -82,7 +82,7 @@ async function confirmDismiss() {
                 <button
                   class="note__x"
                   :aria-label="t('actions.dismiss')"
-                  @click="pendingDismiss = item.id"
+                  v-if="!fleet.readOnly" @click="pendingDismiss = item.id"
                 >
                   <svg viewBox="0 0 16 16" aria-hidden="true">
                     <path
@@ -120,7 +120,7 @@ async function confirmDismiss() {
           </div>
           <div class="meta__row">
             <dt>{{ t('notifications.details.interval') }}</dt>
-            <dd>{{ detail.snapshot.interval }}</dd>
+            <dd>{{ detail.snapshot?.interval ?? '—' }}</dd>
           </div>
         </dl>
 
@@ -136,27 +136,27 @@ async function confirmDismiss() {
         </p>
 
         <p class="detail__label">{{ t('notifications.details.snapshot') }}</p>
-        <div class="detail__tiles">
+        <div v-if="detail.snapshot" class="detail__tiles">
           <KStatTile
             :label="t('metrics.availability')"
             :value="percent(detail.snapshot.availability)"
-            :percent="detail.snapshot.availability"
+            :percent="detail.snapshot.availability ?? undefined"
           />
           <KStatTile
             :label="t('metrics.anomalyScore')"
             :value="percent(detail.snapshot.anomalyScore, 1)"
-            :percent="detail.snapshot.anomalyScore"
+            :percent="detail.snapshot.anomalyScore ?? undefined"
             tone="info"
           />
           <KStatTile
             :label="t('metrics.confidence')"
-            :value="percent(detail.snapshot.confidence * 100, 1)"
-            :percent="detail.snapshot.confidence * 100"
+            :value="percent(detail.snapshot.confidence === null ? null : detail.snapshot.confidence * 100, 1)"
+            :percent="detail.snapshot.confidence === null ? undefined : detail.snapshot.confidence * 100"
             tone="good"
           />
         </div>
 
-        <div class="detail__chart">
+        <div v-if="detail.snapshot" class="detail__chart">
           <KStateBar
             :slices="detail.snapshot.states"
             :labels="stateLabels"
@@ -178,7 +178,7 @@ async function confirmDismiss() {
     >
       <p>{{ t('notifications.dismiss.body') }}</p>
       <template #footer>
-        <KButton @click="pendingDismiss = null">{{ t('actions.cancel') }}</KButton>
+        <KButton v-if="!fleet.readOnly" @click="pendingDismiss = null">{{ t('actions.cancel') }}</KButton>
         <KButton variant="danger" data-autofocus @click="confirmDismiss">
           {{ t('actions.confirm') }}
         </KButton>

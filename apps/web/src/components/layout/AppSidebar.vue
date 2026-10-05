@@ -160,7 +160,7 @@ function isActive(to: string) {
       <AppPrefs variant="panel" class="sidebar__prefs" />
 
       <span class="sidebar__demo">{{ t('demo.badge') }}</span>
-      <p class="sidebar__note">{{ t('demo.notice') }}</p>
+      <p class="sidebar__note">{{ t(fleet.readOnly ? 'demo.backendNotice' : 'demo.notice') }}</p>
       <a class="sidebar__source" :href="brand.repoUrl" target="_blank" rel="noopener noreferrer">{{ t('a11y.viewSource') }} ↗</a>
     </div>
   </aside>

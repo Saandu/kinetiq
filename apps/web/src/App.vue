@@ -34,6 +34,7 @@ onUnmounted(() => {
     <a class="skip-link" href="#main-content" :inert="ui.sidebarOpen ? true : undefined">{{ t('a11y.skipContent') }}</a>
     <AppSidebar />
     <main id="main-content" class="shell__main" tabindex="-1" :inert="ui.sidebarOpen ? true : undefined">
+      <p v-if="fleet.readOnly" class="data-status" role="status">{{ t('data.backendReadOnly') }}</p>
       <div v-if="fleet.error" class="data-status" role="alert">
         <p>{{ t(fleet.writeError ? 'data.writeFailed' : 'data.loadFailed') }}</p>
         <KButton v-if="!fleet.writeError" size="sm" :disabled="fleet.loading" @click="fleet.refresh()">{{ t('actions.retry') }}</KButton>

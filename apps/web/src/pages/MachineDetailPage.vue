@@ -117,13 +117,23 @@ function windowLabel(w: FaultWindow) {
       </KCard>
 
       <template v-else-if="telemetry">
+        <KCard v-if="telemetry.latestReading" :title="t('data.latestReading')" :hint="formatDateTime(telemetry.latestReading.at)">
+          <div class="kpis">
+            <KStatTile :label="t('data.temperature')" :value="`${telemetry.latestReading.metrics.temperatureC.toFixed(1)} °C`" />
+            <KStatTile :label="t('data.vibration')" :value="`${telemetry.latestReading.metrics.vibrationMmS.toFixed(2)} mm/s`" />
+            <KStatTile :label="t('data.spindle')" :value="`${telemetry.latestReading.metrics.spindleRpm.toFixed(0)} rpm`" />
+            <KStatTile :label="t('data.power')" :value="`${telemetry.latestReading.metrics.powerKw.toFixed(2)} kW`" />
+          </div>
+          <p>{{ t('data.sampleWindow', { n: telemetry.samples }) }}</p>
+        </KCard>
+        <p v-else-if="fleet.readOnly" role="status">{{ t('data.waiting') }}</p>
         <!-- headline condition numbers -->
         <div class="kpis">
           <KCard>
             <KStatTile
               :label="t('metrics.availability')"
               :value="percent(telemetry.availability, 1)"
-              :percent="telemetry.availability"
+              :percent="telemetry.availability ?? undefined"
               size="lg"
             />
           </KCard>
@@ -131,7 +141,7 @@ function windowLabel(w: FaultWindow) {
             <KStatTile
               :label="t('metrics.anomalyScore')"
               :value="percent(telemetry.anomalyScore, 1)"
-              :percent="telemetry.anomalyScore"
+              :percent="telemetry.anomalyScore ?? undefined"
               tone="info"
               size="lg"
             />
@@ -139,8 +149,8 @@ function windowLabel(w: FaultWindow) {
           <KCard>
             <KStatTile
               :label="t('metrics.confidence')"
-              :value="percent(telemetry.confidence * 100, 1)"
-              :percent="telemetry.confidence * 100"
+              :value="percent(telemetry.confidence === null ? null : telemetry.confidence * 100, 1)"
+              :percent="telemetry.confidence === null ? undefined : telemetry.confidence * 100"
               tone="good"
               size="lg"
             />
@@ -148,34 +158,35 @@ function windowLabel(w: FaultWindow) {
           <KCard>
             <KStatTile
               :label="t('metrics.currentState')"
-              :value="stateLabels[telemetry.currentState] ?? '—'"
+              :value="telemetry.currentState === null ? '—' : stateLabels[telemetry.currentState] ?? '—'"
               :hint="t('metrics.statesTracked', { n: telemetry.activeStates })"
               size="md"
             />
           </KCard>
         </div>
 
-        <KCard :title="t('machine.stateAnalysis')" :hint="t('machine.stateAnalysisHint')">
+        <KCard :title="t('machine.stateAnalysis')" :hint="t(fleet.readOnly ? 'machine.sampleStateHint' : 'machine.stateAnalysisHint')">
           <KStateBar
             :slices="telemetry.states"
             :labels="stateLabels"
-            :current-state="telemetry.currentState"
+            :current-state="telemetry.currentState ?? -1"
           />
         </KCard>
 
         <div class="split">
           <KCard class="monitor-card" :title="t('machine.maintenanceMonitoring')">
+            <p v-if="!telemetry.maintenance.previous && !telemetry.maintenance.current && !telemetry.maintenance.next">{{ t('data.unavailable') }}</p>
             <div class="windows">
               <div class="windows__col">
                 <p class="windows__head">{{ t('machine.previousMaintenance') }}</p>
-                <div class="win">
+                <div v-if="telemetry.maintenance.previous" class="win">
                   <span class="win__cat">{{ windowLabel(telemetry.maintenance.previous) }}</span>
                   <span class="win__time tnum">
                     {{ formatDateTime(telemetry.maintenance.previous.at) }}
                   </span>
                   <KBadge tone="neutral">{{ telemetry.maintenance.previous.interval }}</KBadge>
                 </div>
-                <div class="win">
+                <div v-if="telemetry.maintenance.current" class="win">
                   <span class="win__cat">{{ windowLabel(telemetry.maintenance.current) }}</span>
                   <span class="win__time tnum">
                     {{ formatDateTime(telemetry.maintenance.current.at) }}
@@ -186,7 +197,7 @@ function windowLabel(w: FaultWindow) {
 
               <div class="windows__col">
                 <p class="windows__head">{{ t('machine.nextMaintenance') }}</p>
-                <div class="win win--next">
+                <div v-if="telemetry.maintenance.next" class="win win--next">
                   <span class="win__cat">{{ windowLabel(telemetry.maintenance.next) }}</span>
                   <span class="win__time tnum">
                     {{ formatDateTime(telemetry.maintenance.next.at) }}
@@ -201,17 +212,18 @@ function windowLabel(w: FaultWindow) {
           </KCard>
 
           <KCard class="monitor-card" :title="t('machine.faultMonitoring')">
+            <p v-if="!telemetry.faults.previous && !telemetry.faults.current && !telemetry.faults.next">{{ t('data.unavailable') }}</p>
             <div class="windows">
               <div class="windows__col">
                 <p class="windows__head">{{ t('machine.previousFault') }}</p>
-                <div class="win">
+                <div v-if="telemetry.faults.previous" class="win">
                   <span class="win__cat">{{ windowLabel(telemetry.faults.previous) }}</span>
                   <span class="win__time tnum">
                     {{ formatDateTime(telemetry.faults.previous.at) }}
                   </span>
                   <KBadge tone="neutral">{{ telemetry.faults.previous.interval }}</KBadge>
                 </div>
-                <div class="win">
+                <div v-if="telemetry.faults.current" class="win">
                   <span class="win__cat">{{ windowLabel(telemetry.faults.current) }}</span>
                   <span class="win__time tnum">
                     {{ formatDateTime(telemetry.faults.current.at) }}
@@ -222,7 +234,7 @@ function windowLabel(w: FaultWindow) {
 
               <div class="windows__col">
                 <p class="windows__head">{{ t('machine.nextFault') }}</p>
-                <div class="win win--next">
+                <div v-if="telemetry.faults.next" class="win win--next">
                   <span class="win__cat">{{ windowLabel(telemetry.faults.next) }}</span>
                   <span class="win__time tnum">
                     {{ formatDateTime(telemetry.faults.next.at) }}
@@ -243,7 +255,7 @@ function windowLabel(w: FaultWindow) {
             :title="t('machine.maintenancePanel')"
             :hint="t('machine.maintenancePanelHint')"
           >
-            <form class="logform" @submit.prevent="addEntry">
+            <form v-if="!fleet.readOnly" class="logform" @submit.prevent="addEntry">
               <KField v-slot="{ id }" :label="t('machine.date')">
                 <KInput :id="id" v-model="entryDate" type="date" />
               </KField>
@@ -284,7 +296,7 @@ function windowLabel(w: FaultWindow) {
                     {{ maintenanceMode ? t('metrics.active') : t('metrics.inactive') }}
                   </p>
                 </div>
-                <KSwitch v-model="maintenanceMode" :disabled="fleet.writing || fleet.selectedLoading" :label="t('machine.maintenanceMode')" />
+                <KSwitch v-model="maintenanceMode" :disabled="fleet.readOnly || fleet.writing || fleet.selectedLoading" :label="t('machine.maintenanceMode')" />
               </div>
 
               <div class="mode">
@@ -294,7 +306,7 @@ function windowLabel(w: FaultWindow) {
                     {{ monitoringEnabled ? t('metrics.active') : t('metrics.inactive') }}
                   </p>
                 </div>
-                <KSwitch v-model="monitoringEnabled" :disabled="fleet.writing || fleet.selectedLoading" :label="t('machine.monitoringEnabled')" />
+                <KSwitch v-model="monitoringEnabled" :disabled="fleet.readOnly || fleet.writing || fleet.selectedLoading" :label="t('machine.monitoringEnabled')" />
               </div>
             </div>
           </KCard>

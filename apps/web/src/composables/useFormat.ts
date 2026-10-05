@@ -55,7 +55,8 @@ export function useFormat() {
     return t('time.hoursAgo', { n: Math.round(diffMin / 60) })
   }
 
-  function percent(value: number, decimals = 0): string {
+  function percent(value: number | null, decimals = 0): string {
+    if (value === null) return '—'
     return `${value.toFixed(decimals)}%`
   }
 

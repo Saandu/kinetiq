@@ -20,7 +20,7 @@ describe('simulation and persistence', async () => {
       const statuses = allMachineStatuses(now + minute * 60_000)
       expect(new Set(statuses.map((s) => s.alert))).toEqual(new Set([0, 1, 2, 3]))
       expect(statuses.filter((s) => !s.online)).toHaveLength(1)
-      expect(statuses.every((s) => s.availability >= 0 && s.availability <= 100)).toBe(true)
+      expect(statuses.every((s) => s.availability !== null && s.availability >= 0 && s.availability <= 100)).toBe(true)
     }
   })
 

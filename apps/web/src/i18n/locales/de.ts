@@ -1,5 +1,15 @@
 export default {
   data: {
+    backendReadOnly: "Lokales Backend · nur lesen. Sensordaten werden in PostgreSQL gespeichert; Analysen und Änderungen sind noch nicht verfügbar.",
+    unavailable: "Keine gespeicherten Daten verfügbar.",
+    waiting: "Warten auf Gerätedaten",
+    latestReading: "Letzter gespeicherter Sensorwert",
+    temperature: "Temperatur",
+    vibration: "Schwingung",
+    spindle: "Spindeldrehzahl",
+    power: "Leistung",
+    sampleWindow: "Verfügbarkeit und Zustandsanteile basieren auf {n} empfangenen Werten der letzten 24 Stunden; Lücken zählen nicht als Betriebszeit.",
+
     loading: 'Maschinendaten werden geladen…',
     loadFailed: 'Maschinendaten konnten nicht geladen werden. Angezeigte Werte stammen aus der letzten erfolgreichen Aktualisierung.',
     writeFailed: 'Die Änderung konnte nicht gespeichert werden. Bitte erneut versuchen.',
@@ -19,6 +29,7 @@ export default {
   },
 
   demo: {
+    backendNotice: 'Lokale Backend-Demo — simulierte Geräte senden über MQTT. Messwerte erreichen dieses Dashboard über SQS, PostgreSQL und die lokale API.',
     badge: 'Demo',
     notice:
       'Portfolio-Demo — die Telemetrie wird im Browser simuliert. Es werden keine Daten übertragen.',
@@ -70,6 +81,8 @@ export default {
   },
 
   metrics: {
+    sampleAvailability: 'Online-Messwerte · 24h',
+    atRisk: 'Gefährdete Maschinen',
     availability: 'Verfügbarkeit',
     anomalyScore: 'Anomaliewert',
     confidence: 'Sicherheit',
@@ -133,6 +146,7 @@ export default {
   },
 
   machine: {
+    sampleStateHint: 'Anteil empfangener Messwerte je Betriebszustand in den letzten 24 Stunden',
     notFound: {
       title: 'Maschine nicht gefunden',
       body: 'Diese Maschine gehört nicht zur überwachten Liste.',

@@ -1,5 +1,15 @@
 export default {
   data: {
+    backendReadOnly: "Local backend · read-only. Sensor readings are stored in PostgreSQL; analytics and writes are not available yet.",
+    unavailable: "No recorded data available.",
+    waiting: "Waiting for device readings",
+    latestReading: "Latest stored sensor reading",
+    temperature: "Temperature",
+    vibration: "Vibration",
+    spindle: "Spindle speed",
+    power: "Power",
+    sampleWindow: "Availability and state shares use {n} received samples from the last 24 hours; gaps are not counted as uptime.",
+
     loading: 'Loading machine data…',
     loadFailed: 'Machine data could not be loaded. Any displayed values are from the last successful refresh.',
     writeFailed: 'The change could not be saved. Please try it again.',
@@ -19,6 +29,7 @@ export default {
   },
 
   demo: {
+    backendNotice: 'Local backend demo — simulated devices publish to MQTT. Readings reach this dashboard through SQS, PostgreSQL and the local API.',
     badge: 'Demo',
     notice: 'Portfolio demo — telemetry is simulated in your browser. No data leaves this page.',
     reset: 'Reset demo data',
@@ -69,6 +80,8 @@ export default {
   },
 
   metrics: {
+    sampleAvailability: 'Online samples · 24h',
+    atRisk: 'Machines at risk',
     availability: 'Availability',
     anomalyScore: 'Anomaly score',
     confidence: 'Confidence',
@@ -132,6 +145,7 @@ export default {
   },
 
   machine: {
+    sampleStateHint: 'Share of received samples across operating states over the last 24 hours',
     notFound: {
       title: 'Machine not found',
       body: 'This machine is not part of the monitored roster.',
