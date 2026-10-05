@@ -44,8 +44,10 @@ Docker is not installed on this Windows host. Database integration, image builds
 
 - Plan and guide committed; full scope preserved.
 - Workspace move: 34 existing tests passed and all 19 built files were byte-identical to the pre-move output.
-- Dependencies: Node 24.21.0 used for checks; current frontend stable releases pinned; TypeScript 6.0.3 retained for Vue compiler compatibility. Full npm audit reported zero vulnerabilities.
+- Dependencies: Node 24.21.0 used for checks; current frontend stable releases pinned; TypeScript 7.0.2 enabled for shared packages; the maintained TypeScript 6 API shim preserves Vue and ESLint compatibility. Full npm audit reported zero vulnerabilities.
 - Async data seam: 42 tests passed; Vue type checks and Vite build passed. Browser smoke checks covered dashboard, machine selection, maintenance toggle/reload, settings save/reload, 390px overflow and mobile Escape close. Browser console had no warnings/errors. Local QA changes were reset.
 - The hosted demo remains on its local source. These commits have not been pushed or deployed.
 
-Next: telemetry contracts, then real PostgreSQL integration and containers. Phase 0 is not complete until the Compose acceptance check passes against real dependencies.
+Telemetry contracts now include strict Zod validation, shared fixture cases and a generated JSON Schema checked during builds. Native TypeScript 7 checks source and tests. A fresh `npm ci` followed by `npm run verify` passed: 42 frontend tests and 30 contract tests, lint, both compiler checks and both builds. Python parity remains pending until analytics exists.
+
+Next: real PostgreSQL integration and containers. Phase 0 is not complete until the Compose acceptance check passes against real dependencies.

@@ -1,0 +1,19 @@
+{
+  "v": 1,
+  "machineId": "mill-01",
+  "seq": 3039,
+  "readings": [
+    {
+      "ts": "2026-10-03T12:00:00.000Z",
+      "online": true,
+      "state": 3,
+      "metrics": { "temperatureC": 61.2, "vibrationMmS": 2.41, "spindleRpm": 11850, "powerKw": 7.9 }
+    },
+    {
+      "ts": "2026-10-03T12:00:10.000Z",
+      "online": true,
+      "state": 3,
+      "metrics": { "temperatureC": 61.3, "vibrationMmS": 2.44, "spindleRpm": 11850, "powerKw": 8 }
+    }
+  ]
+}

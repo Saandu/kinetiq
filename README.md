@@ -148,9 +148,9 @@ npm run dev
 Open [http://localhost:3100](http://localhost:3100).
 
 ```bash
-npm run typecheck  # TypeScript and Vue checks
+npm run typecheck  # native TypeScript 7 and Vue template checks
 npm test           # behavior and regression tests
-npm run verify     # tests, type checks and production build
+npm run verify     # lint, type checks, tests and production builds
 npm run build      # type checks and production build in apps/web/dist/
 npm run preview    # serve the built application locally
 ```
@@ -158,6 +158,8 @@ npm run preview    # serve the built application locally
 No environment file or Firebase account is required to run the frontend locally.
 
 The Vue app lives in `apps/web`. Run npm commands from the repository root: npm workspaces shares one lockfile across the frontend, shared packages and backend services. Backend packages are added in Phase 0; the hosted demo keeps its local source until Phase 2.
+
+`packages/contracts` defines and validates v1 telemetry batches and generates their JSON Schema. Its source and tests use TypeScript 7. Vue and ESLint retain the maintained TypeScript 6 compatibility API until their tooling supports the native API; see [the verified stack setup](docs/STACK_VERSIONS.md).
 
 ## Verification and source tour
 

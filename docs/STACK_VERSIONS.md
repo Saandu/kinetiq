@@ -39,6 +39,10 @@ Use PostgreSQL 18.6 consistently in local development, integration tests and Clo
 
 Only frontend/runtime setup is executable at the beginning of Phase 0. Python checks start when a Python package exists; image builds require Docker; Helm and CDK gates start when their source exists. Missing tools or failed checks must be reported, not treated as passing. Cloud provisioning still requires explicit session confirmation under the plan's working rules.
 
-## Tested compiler exception
+## Verified TypeScript 7 setup
 
-TypeScript 7.0.2 is the registry's newest stable release, but `vue-tsc` 3.3.12 fails with `ERR_PACKAGE_PATH_NOT_EXPORTED` for `typescript/lib/tsc`. Pin TypeScript 6.0.3 (the latest 6.x maintenance release) for the shared toolchain until the Vue checker supports the native compiler. Remove deprecated `baseUrl`; explicit `paths` already resolve relative to the configuration file. This exception preserves Vue template type checking rather than bypassing it.
+TypeScript 7.0.2 is the native compiler for shared TypeScript packages and future backend services. The root installs `@typescript/native` as an exact npm alias for that release, and `typescript` as an alias for `@typescript/typescript6` 6.0.2. That compatibility package resolves the maintained TypeScript 6.0.3 API in the lockfile; it exposes `tsc6`, leaving `tsc` to the native compiler.
+
+This follows [Microsoft's documented side-by-side setup](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/) and [Vue language-tools compatibility change](https://github.com/vuejs/language-tools/pull/6123). TypeScript 7.0 does not expose the compiler API used by Vue's template checker and typescript-eslint. `vue-tsc` 3.3.12 handles the compatibility package and preserves full template checks. This is a tooling boundary, not a reason to retain deprecated application patterns or rewrite Vue components. Remove the shim when both tools support the native API.
+
+Verified locally: `tsc --version` reports 7.0.2, `tsc6 --version` reports 6.0.3, native contracts checks/builds and Vue template checks pass. Deprecated `baseUrl` is removed; explicit `paths` resolve relative to the configuration file. CI runs both package checks through `npm run verify`.

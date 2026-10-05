@@ -1,0 +1,21 @@
+[
+  { "name": "unsupported version", "path": ["v"], "value": 2 },
+  { "name": "tenant injection", "path": ["organizationId"], "value": "other-tenant" },
+  { "name": "topic injection", "path": ["machineId"], "value": "mill-01/telemetry" },
+  { "name": "negative sequence", "path": ["seq"], "value": -1 },
+  { "name": "fractional sequence", "path": ["seq"], "value": 1.5 },
+  { "name": "unsafe sequence", "path": ["seq"], "value": 9007199254740992 },
+  { "name": "empty batch", "path": ["readings"], "value": [] },
+  { "name": "state outside enum", "path": ["readings", 0, "state"], "value": 8 },
+  { "name": "fractional state", "path": ["readings", 0, "state"], "value": 1.5 },
+  { "name": "coerced online flag", "path": ["readings", 0, "online"], "value": "true" },
+  { "name": "missing UTC suffix", "path": ["readings", 0, "ts"], "value": "2026-10-03T12:00:00.000" },
+  { "name": "impossible date", "path": ["readings", 0, "ts"], "value": "2026-02-30T12:00:00.000Z" },
+  { "name": "negative vibration", "path": ["readings", 0, "metrics", "vibrationMmS"], "value": -1 },
+  { "name": "negative spindle speed", "path": ["readings", 0, "metrics", "spindleRpm"], "value": -1 },
+  { "name": "negative power", "path": ["readings", 0, "metrics", "powerKw"], "value": -1 },
+  { "name": "coerced metric", "path": ["readings", 0, "metrics", "powerKw"], "value": "8" },
+  { "name": "unknown metric", "path": ["readings", 0, "metrics", "unexpected"], "value": 1 },
+  { "name": "duplicate timestamp", "path": ["readings", 1, "ts"], "value": "2026-10-03T12:00:00.000Z" },
+  { "name": "out of order timestamp", "path": ["readings", 1, "ts"], "value": "2026-10-03T11:59:59.000Z" }
+]
