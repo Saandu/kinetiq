@@ -23,7 +23,7 @@ export const telemetryReadingSchema = z.strictObject({
 // A payload cannot supply an organization or override that trusted identity.
 export const telemetryBatchStructureSchema = z.strictObject({
   v: z.literal(TELEMETRY_VERSION),
-  machineId: z.string().min(1).max(64).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  machineId: z.string().min(1).max(64).regex(/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/),
   seq: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
   readings: z.array(telemetryReadingSchema).min(1).max(MAX_READINGS_PER_BATCH),
 })

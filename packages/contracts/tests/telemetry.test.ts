@@ -17,6 +17,11 @@ describe('telemetry v1 wire contract', () => {
     expect(parseTelemetryMessage(JSON.stringify(fixture))).toEqual(fixture)
   })
 
+  it('preserves the existing uppercase demo machine identifiers', () => {
+    const demo = { ...fixture, machineId: 'DEMO-CNC-01' }
+    expect(parseTelemetryMessage(JSON.stringify(demo))).toEqual(demo)
+  })
+
   it.each(invalidCases)('rejects $name', ({ path, value }) => {
     const invalid = structuredClone(fixture)
     let parent = invalid

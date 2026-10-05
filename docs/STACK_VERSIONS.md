@@ -37,7 +37,11 @@ Use PostgreSQL 18.6 consistently in local development, integration tests and Clo
 
 ## Verification boundary
 
-Only frontend/runtime setup is executable at the beginning of Phase 0. Python checks start when a Python package exists; image builds require Docker; Helm and CDK gates start when their source exists. Missing tools or failed checks must be reported, not treated as passing. Cloud provisioning still requires explicit session confirmation under the plan's working rules.
+Frontend/runtime setup and contracts were executable at the beginning of Phase 0. Docker is now available, and the local PostgreSQL image and integration tests are executable. Python checks start when a Python package exists; image builds require Docker; Helm and CDK gates start when their source exists. Missing tools or failed checks must be reported, not treated as passing. Cloud provisioning still requires explicit session confirmation under the plan's working rules.
+
+## Verified local database image
+
+The local Docker/Testcontainers image uses `postgres:18.6-bookworm` with digest `sha256:3725f4e2499eef5134592b3b4ab79a543ed7f8e533b05b5b637af926630f6650`. PGDG packages pin `postgresql-18-partman=5.5.0-1.pgdg12+1` and `postgresql-18-cron=1.6.8-1.pgdg12+2`. Image build and installed extension checks passed on this Windows host's Linux amd64 engine. CloudNativePG and ARM compatibility remain Phase 1 checks; do not assume this stock-image entrypoint can be deployed unchanged under the operator.
 
 ## Verified TypeScript 7 setup
 

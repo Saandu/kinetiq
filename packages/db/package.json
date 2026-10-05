@@ -1,0 +1,18 @@
+{
+  "name": "@kinetiq/db",
+  "version": "1.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.check.json",
+    "build": "tsc",
+    "test": "vitest run",
+    "schema:generate": "drizzle-kit generate",
+    "migrate": "node dist/cli.js migrate",
+    "seed": "node dist/cli.js seed"
+  },
+  "dependencies": { "@kinetiq/contracts": "1.0.0", "drizzle-orm": "0.45.3", "pg": "8.23.1" },
+  "devDependencies": { "@types/pg": "8.23.1", "drizzle-kit": "0.31.11", "@testcontainers/postgresql": "12.2.0", "vitest": "5.0.3" }
+}

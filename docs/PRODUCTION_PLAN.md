@@ -179,7 +179,7 @@ Laptop requirement: Docker Desktop with WSL 2 and about 8 GB of memory available
 
 ## 3. Data model (PostgreSQL)
 
-Write migrations as SQL (Drizzle Kit generates the base; partitioning, RLS, functions and extensions are hand-written SQL in the same migration folder). Every table has `created_at timestamptz default now()`.
+Write migrations as SQL (Drizzle Kit generates the base; partitioning, RLS, functions and extensions are hand-written SQL in the same migration folder). Every table has `created_at timestamptz default now()`. Tenant-owned rows also carry `organization_id` where omitted from the abbreviated tables below; composite foreign keys bind that value to the parent machine, site or user.
 
 ### Tenancy and identity
 
@@ -219,7 +219,7 @@ Storage estimate: 12 machines × 8,640 rows/day × 30 days ≈ 3.1 M telemetry r
 ### Security inside the database
 
 - Row Level Security on every tenant table, keyed on `current_setting('app.organization_id')`, with `FORCE ROW LEVEL SECURITY` so the table owner is also subject to it. The API sets the value with `set local` inside every transaction (never plain `set`, which would leak across pooled connections). The API also filters by organization in every query; RLS is defense in depth, and tests prove a query without the setting returns nothing and a pooled connection does not keep the previous request's organization.
-- Database roles: `kinetiq_api` (read/write tenant data, RLS enforced), `kinetiq_ingest` (insert into `telemetry`, update `devices.last_seen_at`, `NOTIFY`, nothing else), `kinetiq_analytics` (read telemetry and settings, write `machine_health`, `predictions`, read/write `fault_events`), `kinetiq_alerts` (write `alerts`). No service uses the superuser at runtime.
+- Database roles: `kinetiq_api` (read/write tenant data, RLS enforced), `kinetiq_ingest` (insert into `telemetry`, read only its conflict-key columns for idempotent inserts, read device identity/last-seen columns, update only `devices.last_seen_at`, and `NOTIFY`), `kinetiq_analytics` (read telemetry and settings, write `machine_health`, `predictions`, read/write `fault_events`), `kinetiq_alerts` (write `alerts`). No service uses the superuser at runtime.
 - Credentials: CloudNativePG declares the roles (managed roles) with generated passwords stored as Kubernetes Secrets in the cluster; each service mounts only its own. The superuser secret is used only by the migration Job. Connections require TLS (CloudNativePG issues the certificates).
 - Network: Postgres has no external Service and no public port. A NetworkPolicy allows connections only from the service pods and the migration Job.
 - Connection budget: `max_connections = 100`. Each service has a fixed pool size (`api` 5 per replica + 1 LISTEN connection, `ingest` 3 per replica, `alerts` 2, analytics 2) and maximum replicas are capped in Helm. A test computes the worst-case total from the values files and fails above 60.

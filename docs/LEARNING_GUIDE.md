@@ -4,6 +4,8 @@ A companion to [PRODUCTION_PLAN.md](PRODUCTION_PLAN.md). The plan says *what* to
 
 Runtime and platform versions are pinned in [STACK_VERSIONS.md](STACK_VERSIONS.md), checked on 5 October 2026. The complete architecture remains the goal; we build and verify it in the steps below.
 
+Completed implementation lessons: [Phase 0 database foundation](lessons/PHASE_0_DATABASE.md), covering transactions, service roles, RLS, pooled connections, composite foreign keys, idempotency and partitions with the actual code and tests.
+
 How to use it:
 
 - Read Parts 1 and 2 once, top to bottom. They give you the mental model.

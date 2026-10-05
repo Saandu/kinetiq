@@ -38,7 +38,7 @@ Open http://localhost:3100. Check the dashboard, a machine deep link, settings a
 
 Node 24.21.0 was downloaded into the ignored `.tools` directory and verified against the official SHA-256 checksum list for local checks. This does not replace the system-wide Node installation; `.nvmrc` selects the required release for developers and CI.
 
-Docker is not installed on this Windows host. Database integration, image builds and the Compose acceptance check remain pending until a Docker engine is available. No cloud resources are required for Phase 0.
+Docker was initially missing. WSL and Docker Desktop are now installed; the Linux engine and hello-world container were verified. Database integration and image builds can run locally. The full Compose acceptance check is still pending. No cloud resources are required for Phase 0.
 
 ## Verified progress, 5 October 2026
 
@@ -50,4 +50,6 @@ Docker is not installed on this Windows host. Database integration, image builds
 
 Telemetry contracts now include strict Zod validation, shared fixture cases and a generated JSON Schema checked during builds. Native TypeScript 7 checks source and tests. A fresh `npm ci` followed by `npm run verify` passed: 42 frontend tests and 30 contract tests, lint, both compiler checks and both builds. Python parity remains pending until analytics exists.
 
-Next: real PostgreSQL integration and containers. Phase 0 is not complete until the Compose acceptance check passes against real dependencies.
+Database foundation: the 18 planned application tables, reviewed migrations, seed, unprivileged service roles, tenant-local transactions, composite tenant foreign keys, idempotent telemetry inserts, daily raw partitions and monthly health partitions are implemented. The local PostgreSQL image includes pinned pg_partman/pg_cron, with scheduled maintenance and retention. Hourly aggregate computation and CloudNativePG image compatibility remain pending. Final fresh-install verification passed 96 tests (42 frontend, 31 contracts, 23 real database), lint, all builds and type checks, with zero npm audit vulnerabilities. See [the implementation lesson](lessons/PHASE_0_DATABASE.md).
+
+Next: simulator, MQTT-to-SQS bridge, ingest service, read API and Compose wiring. Phase 0 is not complete until the Compose acceptance check passes against real dependencies.
