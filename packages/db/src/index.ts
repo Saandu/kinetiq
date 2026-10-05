@@ -38,6 +38,17 @@ export async function withTenantTransaction<T>(pool: Pool, organizationId: strin
 }
 
 export interface TrustedDevice { organizationId: string; machineId: string; thingName: string }
+export interface DeviceIdentity { thingName: string; machineId: string; siteId: string }
+export class InvalidDeviceMapping extends Error { override name = 'InvalidDeviceMapping' }
+export async function resolveDevice(pool: Pool, identity: DeviceIdentity): Promise<TrustedDevice> {
+  const result = await pool.query<{ organization_id: string; machine_id: string; thing_name: string }>(
+    'SELECT organization_id, machine_id, thing_name FROM kinetiq.resolve_device($1, $2, $3::uuid)',
+    [identity.thingName, identity.machineId, identity.siteId],
+  )
+  const mapping = result.rows[0]
+  if (!mapping) throw new InvalidDeviceMapping('No registered device matches the trusted envelope')
+  return { organizationId: mapping.organization_id, machineId: mapping.machine_id, thingName: mapping.thing_name }
+}
 // Ingest's trusted envelope determines identity. Never take organizationId from JSON.
 export async function insertTelemetryBatch(pool: Pool, device: TrustedDevice, input: TelemetryBatch): Promise<number> {
   const batch = telemetryBatchSchema.parse(input)

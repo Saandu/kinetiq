@@ -1,0 +1,26 @@
+{
+  "name": "@kinetiq/pipeline-tests",
+  "version": "1.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "test:pipeline": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@kinetiq/contracts": "1.0.0",
+    "@kinetiq/db": "1.0.0",
+    "@kinetiq/runtime": "1.0.0",
+    "@kinetiq/local-bridge": "1.0.0",
+    "@kinetiq/ingest": "1.0.0",
+    "@kinetiq/simulator": "1.0.0",
+    "@aws-sdk/client-sqs": "3.1146.0",
+    "@testcontainers/postgresql": "12.2.0",
+    "testcontainers": "12.2.0",
+    "mqtt": "5.16.0",
+    "pg": "8.23.1",
+    "@types/pg": "8.23.1",
+    "vitest": "5.0.3"
+  }
+}

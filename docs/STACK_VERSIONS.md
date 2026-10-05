@@ -23,7 +23,7 @@ Node follows LTS. PostgreSQL follows supported stable majors. Python and most pl
 | Terraform | 1.16.5 | [Release](https://github.com/hashicorp/terraform/releases/tag/v1.16.5) |
 | AWS CDK | 2.272.0 | [Release](https://github.com/aws/aws-cdk/releases/tag/v2.272.0) |
 | Mosquitto | 2.1.2 | [Downloads](https://mosquitto.org/download/) |
-| LocalStack | 4.14.0 tagged community release | [Releases](https://github.com/localstack/localstack/releases); check distribution/auth requirements and SQS/S3 support before Compose integration |
+| LocalStack | 2026.09.0, maintained unified image | [Image versioning](https://docs.localstack.cloud/aws/customization/other-installations/docker-images/); [account token required](https://docs.localstack.cloud/aws/getting-started/auth-token/), stored locally outside frontend files |
 | uv | 0.12.23 | [Release](https://github.com/astral-sh/uv/releases/tag/0.12.23) |
 | Firebase CLI | 15.32.1 | [npm package](https://www.npmjs.com/package/firebase-tools) |
 
@@ -40,6 +40,8 @@ Use PostgreSQL 18.6 consistently in local development, integration tests and Clo
 Frontend/runtime setup and contracts were executable at the beginning of Phase 0. Docker is now available, and the local PostgreSQL image and integration tests are executable. Python checks start when a Python package exists; image builds require Docker; Helm and CDK gates start when their source exists. Missing tools or failed checks must be reported, not treated as passing. Cloud provisioning still requires explicit session confirmation under the plan's working rules.
 
 ## Verified local database image
+
+The local messaging checkpoint pins `eclipse-mosquitto:2.1.2-alpine` to `sha256:38c0da4f2ef84284d47b3b3eeea1cb3bdeabe81ee10caf0cd5c5ff61ee3ea408` and `localstack/localstack:2026.09.0` to `sha256:801a3dff7f6a23857e7310b7602e67d52a29dfdcb03e09f7c608d5c57d24b792`. The service Dockerfile pins `node:24.21.0-bookworm-slim` to `sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6`. LocalStack SQS and broker ACL/recovery behavior were tested with the account token on Linux amd64. S3 backup behavior, ARM and cloud IAM remain separate checks.
 
 The local Docker/Testcontainers image uses `postgres:18.6-bookworm` with digest `sha256:3725f4e2499eef5134592b3b4ab79a543ed7f8e533b05b5b637af926630f6650`. PGDG packages pin `postgresql-18-partman=5.5.0-1.pgdg12+1` and `postgresql-18-cron=1.6.8-1.pgdg12+2`. Image build and installed extension checks passed on this Windows host's Linux amd64 engine. CloudNativePG and ARM compatibility remain Phase 1 checks; do not assume this stock-image entrypoint can be deployed unchanged under the operator.
 

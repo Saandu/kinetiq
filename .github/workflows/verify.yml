@@ -35,9 +35,30 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  pipeline:
+    name: Verify MQTT and SQS pipeline
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run db:image
+      - run: npm run services:images
+      - name: Verify the real local transport and recovery paths
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+        run: npm run test:pipeline
+
   deploy:
     name: Deploy Firebase Hosting
-    needs: verify
+    needs: [verify, pipeline]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10

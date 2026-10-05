@@ -1,4 +1,5 @@
 import { z } from 'zod'
+export { DEMO_FLEET, simulationFleet } from './fleet.js'
 
 export const TELEMETRY_VERSION = 1
 export const MAX_READINGS_PER_BATCH = 6

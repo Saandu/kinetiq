@@ -1,0 +1,27 @@
+{
+  "name": "@kinetiq/runtime",
+  "version": "1.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.check.json",
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sqs": "3.1146.0",
+    "@kinetiq/contracts": "1.0.0",
+    "pino": "10.4.0",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "vitest": "5.0.3"
+  }
+}

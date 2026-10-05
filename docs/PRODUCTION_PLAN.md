@@ -397,7 +397,7 @@ Run with `uv run kinetiq-analytics eval`. The simulated benchmark is determinist
 
 Every workload: CPU and memory requests and limits (the node has 4 GB, so these matter and are summed in a test), `securityContext` (non-root, no privilege escalation, drop all capabilities, `seccompProfile: RuntimeDefault`), its own ServiceAccount (mapped to its own IAM role through IRSA where it calls AWS). Namespace-wide default-deny NetworkPolicy, then explicit allows (ingress → `api`, `api` → `analytics-api`, services → `postgres`, everything → AWS endpoints, Alloy → `/metrics`).
 
-`local` and `ci` values use Mosquitto and LocalStack instead of IoT Core, SQS and S3, so the whole system runs without a cloud account.
+`local` and `ci` values use Mosquitto and LocalStack instead of IoT Core, SQS and S3, so the whole system runs without an AWS account. Maintained LocalStack images require a LocalStack account and auth token; keep that token in root local environment configuration or a CI secret, outside frontend files.
 
 ### Cluster add-ons (installed by Argo CD from `deploy/platform/`)
 

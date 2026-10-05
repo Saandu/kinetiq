@@ -1,0 +1,1840 @@
+{
+  "id": "ddc48863-85ae-4436-b06d-6e2acd798b2c",
+  "prevId": "62b92f51-136d-4332-a46b-628ca7f9a262",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "kinetiq.alert_dismissals": {
+      "name": "alert_dismissals",
+      "schema": "kinetiq",
+      "columns": {
+        "alert_id": {
+          "name": "alert_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "at": {
+          "name": "at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "alert_dismissals_alert_id_alerts_id_fk": {
+          "name": "alert_dismissals_alert_id_alerts_id_fk",
+          "tableFrom": "alert_dismissals",
+          "columnsFrom": [
+            "alert_id"
+          ],
+          "tableTo": "alerts",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "alert_dismissals_user_id_app_users_id_fk": {
+          "name": "alert_dismissals_user_id_app_users_id_fk",
+          "tableFrom": "alert_dismissals",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "tableTo": "app_users",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "alert_dismissals_organization_id_organizations_id_fk": {
+          "name": "alert_dismissals_organization_id_organizations_id_fk",
+          "tableFrom": "alert_dismissals",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "tableTo": "organizations",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "alert_dismissals_alert_id_user_id_pk": {
+          "name": "alert_dismissals_alert_id_user_id_pk",
+          "columns": [
+            "alert_id",
+            "user_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kinetiq.alerts": {
+      "name": "alerts",
+      "schema": "kinetiq",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "machine_id": {
+          "name": "machine_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "level": {
+          "name": "level",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "message_key": {
+          "name": "message_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "snapshot": {
+          "name": "snapshot",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "opened_at": {
+          "name": "opened_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "resolved_at": {
+          "name": "resolved_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dedupe_key": {
+          "name": "dedupe_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "alerts_machine_id_machines_id_fk": {
+          "name": "alerts_machine_id_machines_id_fk",
+          "tableFrom": "alerts",
+          "columnsFrom": [
+            "machine_id"
+          ],
+          "tableTo": "machines",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "alerts_organization_id_organizations_id_fk": {
+          "name": "alerts_organization_id_organizations_id_fk",
+          "tableFrom": "alerts",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "tableTo": "organizations",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "alerts_id_org": {
+          "name": "alerts_id_org",
+          "columns": [
+            "id",
+            "organization_id"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kinetiq.app_users": {
+      "name": "app_users",
+      "schema": "kinetiq",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cognito_sub": {
+          "name": "cognito_sub",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "display_name": {
+          "name": "display_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "app_users_organization_id_organizations_id_fk": {
+          "name": "app_users_organization_id_organizations_id_fk",
+          "tableFrom": "app_users",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "tableTo": "organizations",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "app_users_cognito_sub_unique": {
+          "name": "app_users_cognito_sub_unique",
+          "columns": [
+            "cognito_sub"
+          ],
+          "nullsNotDistinct": false
+        },
+        "users_id_org": {
+          "name": "users_id_org",
+          "columns": [
+            "id",
+            "organization_id"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kinetiq.audit_log": {
+      "name": "audit_log",
+      "schema": "kinetiq",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "action": {
+          "name": "action",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entity": {
+          "name": "entity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entity_id": {
+          "name": "entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "payload": {
+          "name": "payload",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "at": {
+          "name": "at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "audit_log_organization_id_organizations_id_fk": {
+          "name": "audit_log_organization_id_organizations_id_fk",
+          "tableFrom": "audit_log",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "tableTo": "organizations",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "audit_log_user_id_app_users_id_fk": {
+          "name": "audit_log_user_id_app_users_id_fk",
+          "tableFrom": "audit_log",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "tableTo": "app_users",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kinetiq.devices": {
+      "name": "devices",
+      "schema": "kinetiq",
+      "columns": {
+        "thing_name": {
+          "name": "thing_name",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "machine_id": {
+          "name": "machine_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "certificate_id": {
+          "name": "certificate_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_seen_at": {
+          "name": "last_seen_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "devices_organization_id_organizations_id_fk": {
+          "name": "devices_organization_id_organizations_id_fk",
+          "tableFrom": "devices",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "tableTo": "organizations",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "devices_machine_id_machines_id_fk": {
+          "name": "devices_machine_id_machines_id_fk",
+          "tableFrom": "devices",
+          "columnsFrom": [
+            "machine_id"
+          ],
+          "tableTo": "machines",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "devices_machine_id_unique": {
+          "name": "devices_machine_id_unique",
+          "columns": [
+            "machine_id"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kinetiq.fault_events": {
+      "name": "fault_events",
+      "schema": "kinetiq",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "machine_id": {
+          "name": "machine_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ended_at": {
+          "name": "ended_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "fault_events_machine_id_machines_id_fk": {
+          "name": "fault_events_machine_id_machines_id_fk",
+          "tableFrom": "fault_events",
+          "columnsFrom": [
+            "machine_id"
+          ],
+          "tableTo": "machines",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "fault_events_organization_id_organizations_id_fk": {
+          "name": "fault_events_organization_id_organizations_id_fk",
+          "tableFrom": "fault_events",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "tableTo": "organizations",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kinetiq.idempotency_keys": {
+      "name": "idempotency_keys",
+      "schema": "kinetiq",
+      "columns": {
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "request_hash": {
+          "name": "request_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "response": {
+          "name": "response",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "idempotency_keys_user_id_app_users_id_fk": {
+          "name": "idempotency_keys_user_id_app_users_id_fk",
+          "tableFrom": "idempotency_keys",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "tableTo": "app_users",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "idempotency_keys_organization_id_organizations_id_fk": {
+          "name": "idempotency_keys_organization_id_organizations_id_fk",
+          "tableFrom": "idempotency_keys",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "tableTo": "organizations",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "idempotency_keys_key_user_id_pk": {
+          "name": "idempotency_keys_key_user_id_pk",
+          "columns": [
+            "key",
+            "user_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kinetiq.machine_health": {
+      "name": "machine_health",
+      "schema": "kinetiq",
+      "columns": {
+        "machine_id": {
+          "name": "machine_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ts": {
+          "name": "ts",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "method": {
+          "name": "method",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "anomaly_score": {
+          "name": "anomaly_score",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "health_score": {
+          "name": "health_score",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "confidence": {
+          "name": "confidence",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contributors": {
+          "name": "contributors",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "model_version": {
+          "name": "model_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "machine_health_machine_id_machines_id_fk": {
+          "name": "machine_health_machine_id_machines_id_fk",
+          "tableFrom": "machine_health",
+          "columnsFrom": [
+            "machine_id"
+          ],
+          "tableTo": "machines",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "machine_health_organization_id_organizations_id_fk": {
+          "name": "machine_health_organization_id_organizations_id_fk",
+          "tableFrom": "machine_health",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "tableTo": "organizations",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "machine_health_machine_id_ts_pk": {
+          "name": "machine_health_machine_id_ts_pk",
+          "columns": [
+            "machine_id",
+            "ts"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kinetiq.machine_modes": {
+      "name": "machine_modes",
+      "schema": "kinetiq",
+      "columns": {
+        "machine_id": {
+          "name": "machine_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "maintenance_mode": {
+          "name": "maintenance_mode",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "monitoring_enabled": {
+          "name": "monitoring_enabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "desired_version": {
+          "name": "desired_version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "reported_version": {
+          "name": "reported_version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "machine_modes_machine_id_machines_id_fk": {
+          "name": "machine_modes_machine_id_machines_id_fk",
+          "tableFrom": "machine_modes",
+          "columnsFrom": [
+            "machine_id"
+          ],
+          "tableTo": "machines",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "machine_modes_organization_id_organizations_id_fk": {
+          "name": "machine_modes_organization_id_organizations_id_fk",
+          "tableFrom": "machine_modes",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "tableTo": "organizations",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kinetiq.machine_settings": {
+      "name": "machine_settings",
+      "schema": "kinetiq",
+      "columns": {
+        "machine_id": {
+          "name": "machine_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "state_names": {
+          "name": "state_names",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "watch_below": {
+          "name": "watch_below",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 90
+        },
+        "warning_below": {
+          "name": "warning_below",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 75
+        },
+        "critical_below": {
+          "name": "critical_below",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 50
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "machine_settings_machine_id_machines_id_fk": {
+          "name": "machine_settings_machine_id_machines_id_fk",
+          "tableFrom": "machine_settings",
+          "columnsFrom": [
+            "machine_id"
+          ],
+          "tableTo": "machines",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "machine_settings_organization_id_organizations_id_fk": {
+          "name": "machine_settings_organization_id_organizations_id_fk",
+          "tableFrom": "machine_settings",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "tableTo": "organizations",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "machine_settings_updated_by_app_users_id_fk": {
+          "name": "machine_settings_updated_by_app_users_id_fk",
+          "tableFrom": "machine_settings",
+          "columnsFrom": [
+            "updated_by"
+          ],
+          "tableTo": "app_users",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kinetiq.machines": {
+      "name": "machines",
+      "schema": "kinetiq",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "site_id": {
+          "name": "site_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hidden": {
+          "name": "hidden",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "machines_organization_id_organizations_id_fk": {
+          "name": "machines_organization_id_organizations_id_fk",
+          "tableFrom": "machines",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "tableTo": "organizations",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "machines_site_id_sites_id_fk": {
+          "name": "machines_site_id_sites_id_fk",
+          "tableFrom": "machines",
+          "columnsFrom": [
+            "site_id"
+          ],
+          "tableTo": "sites",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "machines_id_org": {
+          "name": "machines_id_org",
+          "columns": [
+            "id",
+            "organization_id"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kinetiq.maintenance_entries": {
+      "name": "maintenance_entries",
+      "schema": "kinetiq",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "machine_id": {
+          "name": "machine_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "at": {
+          "name": "at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "maintenance_entries_machine_id_machines_id_fk": {
+          "name": "maintenance_entries_machine_id_machines_id_fk",
+          "tableFrom": "maintenance_entries",
+          "columnsFrom": [
+            "machine_id"
+          ],
+          "tableTo": "machines",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "maintenance_entries_organization_id_organizations_id_fk": {
+          "name": "maintenance_entries_organization_id_organizations_id_fk",
+          "tableFrom": "maintenance_entries",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "tableTo": "organizations",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "maintenance_entries_created_by_app_users_id_fk": {
+          "name": "maintenance_entries_created_by_app_users_id_fk",
+          "tableFrom": "maintenance_entries",
+          "columnsFrom": [
+            "created_by"
+          ],
+          "tableTo": "app_users",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kinetiq.model_settings": {
+      "name": "model_settings",
+      "schema": "kinetiq",
+      "columns": {
+        "machine_id": {
+          "name": "machine_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "method": {
+          "name": "method",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'zscore'"
+        },
+        "window_minutes": {
+          "name": "window_minutes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 30
+        },
+        "zscore_threshold": {
+          "name": "zscore_threshold",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 3
+        },
+        "contamination": {
+          "name": "contamination",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0.05
+        },
+        "min_confidence": {
+          "name": "min_confidence",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0.5
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "model_settings_machine_id_machines_id_fk": {
+          "name": "model_settings_machine_id_machines_id_fk",
+          "tableFrom": "model_settings",
+          "columnsFrom": [
+            "machine_id"
+          ],
+          "tableTo": "machines",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "model_settings_organization_id_organizations_id_fk": {
+          "name": "model_settings_organization_id_organizations_id_fk",
+          "tableFrom": "model_settings",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "tableTo": "organizations",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "model_settings_updated_by_app_users_id_fk": {
+          "name": "model_settings_updated_by_app_users_id_fk",
+          "tableFrom": "model_settings",
+          "columnsFrom": [
+            "updated_by"
+          ],
+          "tableTo": "app_users",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kinetiq.organizations": {
+      "name": "organizations",
+      "schema": "kinetiq",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kinetiq.predictions": {
+      "name": "predictions",
+      "schema": "kinetiq",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "machine_id": {
+          "name": "machine_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "computed_at": {
+          "name": "computed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "metric": {
+          "name": "metric",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "threshold": {
+          "name": "threshold",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "eta": {
+          "name": "eta",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "slope": {
+          "name": "slope",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "r2": {
+          "name": "r2",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "predictions_machine_id_machines_id_fk": {
+          "name": "predictions_machine_id_machines_id_fk",
+          "tableFrom": "predictions",
+          "columnsFrom": [
+            "machine_id"
+          ],
+          "tableTo": "machines",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "predictions_organization_id_organizations_id_fk": {
+          "name": "predictions_organization_id_organizations_id_fk",
+          "tableFrom": "predictions",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "tableTo": "organizations",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kinetiq.sites": {
+      "name": "sites",
+      "schema": "kinetiq",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "timezone": {
+          "name": "timezone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'UTC'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "sites_organization_id_organizations_id_fk": {
+          "name": "sites_organization_id_organizations_id_fk",
+          "tableFrom": "sites",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "tableTo": "organizations",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "sites_id_org": {
+          "name": "sites_id_org",
+          "columns": [
+            "id",
+            "organization_id"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kinetiq.telemetry": {
+      "name": "telemetry",
+      "schema": "kinetiq",
+      "columns": {
+        "machine_id": {
+          "name": "machine_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ts": {
+          "name": "ts",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "temperature_c": {
+          "name": "temperature_c",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vibration_mm_s": {
+          "name": "vibration_mm_s",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "spindle_rpm": {
+          "name": "spindle_rpm",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "power_kw": {
+          "name": "power_kw",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "state_index": {
+          "name": "state_index",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "online": {
+          "name": "online",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "received_at": {
+          "name": "received_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "telemetry_machine_id_machines_id_fk": {
+          "name": "telemetry_machine_id_machines_id_fk",
+          "tableFrom": "telemetry",
+          "columnsFrom": [
+            "machine_id"
+          ],
+          "tableTo": "machines",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "telemetry_organization_id_organizations_id_fk": {
+          "name": "telemetry_organization_id_organizations_id_fk",
+          "tableFrom": "telemetry",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "tableTo": "organizations",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "telemetry_machine_id_ts_pk": {
+          "name": "telemetry_machine_id_ts_pk",
+          "columns": [
+            "machine_id",
+            "ts"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kinetiq.telemetry_hourly": {
+      "name": "telemetry_hourly",
+      "schema": "kinetiq",
+      "columns": {
+        "machine_id": {
+          "name": "machine_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hour": {
+          "name": "hour",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "temperature_avg": {
+          "name": "temperature_avg",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "temperature_min": {
+          "name": "temperature_min",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "temperature_max": {
+          "name": "temperature_max",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vibration_avg": {
+          "name": "vibration_avg",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vibration_min": {
+          "name": "vibration_min",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vibration_max": {
+          "name": "vibration_max",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "spindle_avg": {
+          "name": "spindle_avg",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "spindle_min": {
+          "name": "spindle_min",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "spindle_max": {
+          "name": "spindle_max",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "power_avg": {
+          "name": "power_avg",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "power_min": {
+          "name": "power_min",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "power_max": {
+          "name": "power_max",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "samples": {
+          "name": "samples",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "online_share": {
+          "name": "online_share",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "state_share": {
+          "name": "state_share",
+          "type": "real[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "telemetry_hourly_machine_id_machines_id_fk": {
+          "name": "telemetry_hourly_machine_id_machines_id_fk",
+          "tableFrom": "telemetry_hourly",
+          "columnsFrom": [
+            "machine_id"
+          ],
+          "tableTo": "machines",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "telemetry_hourly_organization_id_organizations_id_fk": {
+          "name": "telemetry_hourly_organization_id_organizations_id_fk",
+          "tableFrom": "telemetry_hourly",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "tableTo": "organizations",
+          "schemaTo": "kinetiq",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "telemetry_hourly_machine_id_hour_pk": {
+          "name": "telemetry_hourly_machine_id_hour_pk",
+          "columns": [
+            "machine_id",
+            "hour"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {
+    "kinetiq": "kinetiq"
+  },
+  "views": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

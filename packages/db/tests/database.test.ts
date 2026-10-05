@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url'
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql'
 import { Pool } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { createServicePool, database, insertTelemetryBatch, migrate, seed, withTenantTransaction } from '../src/index.js'
-import { DEMO_ORGANIZATION, DEMO_MACHINES } from '../src/seed.js'
+import { createServicePool, database, insertTelemetryBatch, migrate, resolveDevice, seed, withTenantTransaction } from '../src/index.js'
+import { DEMO_ORGANIZATION, DEMO_MACHINES, DEMO_SITE } from '../src/seed.js'
 import type { TelemetryBatch } from '@kinetiq/contracts'
 
 const OTHER_ORG = '22222222-2222-4222-8222-222222222222'
@@ -67,7 +67,7 @@ describe('real PostgreSQL tenant and service boundaries', () => {
 
   it('applies migrations and development seed repeatably', async () => {
     await migrate(admin); await seed(admin)
-    expect((await admin.query('SELECT * FROM migration.applied')).rowCount).toBe(2)
+    expect((await admin.query('SELECT * FROM migration.applied')).rowCount).toBe(3)
     expect((await admin.query('SELECT * FROM kinetiq.machines WHERE organization_id = $1', [DEMO_ORGANIZATION])).rowCount).toBe(DEMO_MACHINES.length)
   })
 
@@ -126,7 +126,7 @@ describe('real PostgreSQL tenant and service boundaries', () => {
 
   it('keeps runtime roles unprivileged and schema creation restricted', async () => {
     const roles = await admin.query("SELECT rolsuper, rolbypassrls, rolcreatedb, rolcreaterole FROM pg_roles WHERE rolname LIKE 'kinetiq_%'")
-    expect(roles.rowCount).toBe(4)
+    expect(roles.rowCount).toBe(5)
     expect(roles.rows.every((r) => !r.rolsuper && !r.rolbypassrls && !r.rolcreatedb && !r.rolcreaterole)).toBe(true)
     await expect(api.query('CREATE TABLE public.unwanted (id int)')).rejects.toMatchObject({ code: '42501' })
     await expect(api.query('CREATE TABLE kinetiq.unwanted (id int)')).rejects.toMatchObject({ code: '42501' })
@@ -167,6 +167,16 @@ describe('real PostgreSQL tenant and service boundaries', () => {
 })
 
 describe('ingest and partition correctness', () => {
+  it('resolves only an exact registry identity and restricts lookup to ingest', async () => {
+    expect(await resolveDevice(ingest, { thingName: trusted.thingName, machineId: trusted.machineId, siteId: DEMO_SITE })).toEqual(trusted)
+    await expect(resolveDevice(ingest, { thingName: trusted.thingName, machineId: trusted.machineId, siteId: OTHER_SITE })).rejects.toThrow('No registered device')
+    await expect(resolveDevice(api, { thingName: trusted.thingName, machineId: trusted.machineId, siteId: DEMO_SITE })).rejects.toMatchObject({ code: '42501' })
+    await expect(ingest.query('SET ROLE kinetiq_registry')).rejects.toMatchObject({ code: '42501' })
+    const owner = await admin.query(`SELECT r.rolname, r.rolcanlogin, r.rolsuper, r.rolbypassrls, p.prosecdef
+      FROM pg_proc p JOIN pg_roles r ON r.oid=p.proowner
+      WHERE p.oid='kinetiq.resolve_device(text,text,uuid)'::regprocedure`)
+    expect(owner.rows).toEqual([{ rolname: 'kinetiq_registry', rolcanlogin: false, rolsuper: false, rolbypassrls: false, prosecdef: true }])
+  })
   it('routes rows into daily partitions and ignores duplicate delivery', async () => {
     const message = batch()
     expect(await insertTelemetryBatch(ingest, trusted, message)).toBe(2)
@@ -251,10 +261,10 @@ describe('migration safety', () => {
     const folder = await mkdtemp(join(tmpdir(), 'kinetiq-migration-failure-'))
     try {
       await cp(migrations, folder, { recursive: true })
-      await writeFile(join(folder, '0002_failure.sql'), 'CREATE TABLE kinetiq.failed_migration_probe (id int); SELECT missing_function();')
+      await writeFile(join(folder, '0003_failure.sql'), 'CREATE TABLE kinetiq.failed_migration_probe (id int); SELECT missing_function();')
       await expect(migrate(admin, folder)).rejects.toMatchObject({ code: '42883' })
       expect((await admin.query("SELECT to_regclass('kinetiq.failed_migration_probe') AS probe")).rows[0].probe).toBeNull()
-      expect((await admin.query("SELECT * FROM migration.applied WHERE name = '0002_failure.sql'")).rowCount).toBe(0)
+      expect((await admin.query("SELECT * FROM migration.applied WHERE name = '0003_failure.sql'")).rowCount).toBe(0)
     } finally { await rm(folder, { recursive: true, force: true }) }
   })
 

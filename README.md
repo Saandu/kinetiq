@@ -163,6 +163,8 @@ The Vue app lives in `apps/web`. Run npm commands from the repository root: npm 
 
 `packages/db` contains the Drizzle schema, SQL migrations, seed and tenant-safe transaction/ingest helpers. Full verification requires Docker with Linux containers; it builds PostgreSQL 18.6 with pg_partman and pg_cron and runs disposable Testcontainers tests. See [database details](packages/db/README.md) and [the implementation lesson](docs/lessons/PHASE_0_DATABASE.md). The frontend can still run independently with `npm run dev`; it is not connected to this database yet.
 
+The local transport is implemented in `services/simulator`, `services/local-bridge` and `services/ingest`. Run `npm run services:images` to build and check their non-root production images. `npm run test:pipeline` starts disposable, authenticated Mosquitto, maintained LocalStack and PostgreSQL containers and verifies twelve-device delivery, retries, deduplication, broker ACLs and dead-letter redrive. This separate integration gate requires `LOCALSTACK_AUTH_TOKEN` in the root, Git-ignored `.env.local` or environment. Main-branch deployment now also requires its pipeline CI job and the matching GitHub Actions secret; the local token is not uploaded automatically. See [the messaging lesson](docs/lessons/PHASE_0_MESSAGING.md). Read API, frontend backend integration and complete Compose acceptance remain pending.
+
 ## Verification and source tour
 
 The [CI/CD workflow](.github/workflows/verify.yml) runs on branch pushes and pull
@@ -206,7 +208,7 @@ flowchart LR
   Clock[Shared visibility-aware clock] --> Stores
 ```
 
-There are four **direct runtime dependencies**. The build output reports gzip
+The Vue app has four **direct runtime dependencies**. The build output reports gzip
 sizes per file, including shared and lazy-loaded route chunks; a single main
 bundle measurement should not be presented as the size of the whole app.
 

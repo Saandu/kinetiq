@@ -1,0 +1,27 @@
+{
+  "name": "@kinetiq/simulator",
+  "version": "1.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.check.json",
+    "build": "tsc",
+    "test": "vitest run",
+    "start": "node dist/main.js"
+  },
+  "dependencies": {
+    "@kinetiq/contracts": "1.0.0",
+    "@kinetiq/runtime": "1.0.0",
+    "mqtt": "5.16.0"
+  },
+  "devDependencies": {
+    "vitest": "5.0.3"
+  }
+}

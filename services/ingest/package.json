@@ -1,0 +1,28 @@
+{
+  "name": "@kinetiq/ingest",
+  "version": "1.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.check.json",
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@kinetiq/db": "1.0.0",
+    "@kinetiq/runtime": "1.0.0",
+    "@aws-sdk/client-sqs": "3.1146.0",
+    "@kinetiq/contracts": "1.0.0"
+  },
+  "devDependencies": {
+    "vitest": "5.0.3"
+  }
+}
