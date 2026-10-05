@@ -1,0 +1,36 @@
+{
+  "name": "@kinetiq/api",
+  "version": "1.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc && node scripts/generate-openapi.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.check.json",
+    "test": "vitest run",
+    "start": "node dist/main.js",
+    "schema:update": "tsc && node scripts/generate-openapi.mjs --write"
+  },
+  "dependencies": {
+    "@kinetiq/contracts": "1.0.0",
+    "@kinetiq/db": "1.0.0",
+    "@kinetiq/runtime": "1.0.0",
+    "fastify": "5.12.5",
+    "fastify-type-provider-zod": "7.0.0",
+    "@fastify/swagger": "9.9.1",
+    "zod": "4.6.5",
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "vitest": "5.0.3",
+    "@testcontainers/postgresql": "12.2.0",
+    "@types/pg": "8.23.1",
+    "openapi-typescript": "7.13.0"
+  }
+}

@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspace @kinetiq/web",
-    "build": "npm run build --workspace @kinetiq/contracts && npm run build --workspace @kinetiq/runtime && npm run build --workspace @kinetiq/db && npm run build --workspace @kinetiq/simulator && npm run build --workspace @kinetiq/local-bridge && npm run build --workspace @kinetiq/ingest && npm run build --workspace @kinetiq/web",
+    "build": "npm run build --workspace @kinetiq/contracts && npm run build --workspace @kinetiq/runtime && npm run build --workspace @kinetiq/db && npm run build --workspace @kinetiq/simulator && npm run build --workspace @kinetiq/local-bridge && npm run build --workspace @kinetiq/ingest && npm run build --workspace @kinetiq/api && npm run build --workspace @kinetiq/web",
     "build:only": "npm run build:only --workspace @kinetiq/web",
     "preview": "npm run preview --workspace @kinetiq/web",
     "typecheck": "npm run typecheck --workspaces --if-present",

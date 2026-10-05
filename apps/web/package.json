@@ -22,7 +22,8 @@
     "pinia": "4.0.3",
     "vue": "3.5.43",
     "vue-i18n": "11.4.13",
-    "vue-router": "5.3.1"
+    "vue-router": "5.3.1",
+    "@kinetiq/contracts": "1.0.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "6.0.9",

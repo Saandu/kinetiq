@@ -9,6 +9,7 @@ COPY packages/pipeline-tests/package.json packages/pipeline-tests/package.json
 COPY services/simulator/package.json services/simulator/package.json
 COPY services/local-bridge/package.json services/local-bridge/package.json
 COPY services/ingest/package.json services/ingest/package.json
+COPY services/api/package.json services/api/package.json
 RUN npm ci
 COPY packages/contracts packages/contracts
 COPY packages/runtime packages/runtime
@@ -33,6 +34,7 @@ COPY --from=build /app/packages/pipeline-tests/package.json packages/pipeline-te
 COPY --from=build /app/services/simulator/package.json services/simulator/package.json
 COPY --from=build /app/services/local-bridge/package.json services/local-bridge/package.json
 COPY --from=build /app/services/ingest/package.json services/ingest/package.json
+COPY --from=build /app/services/api/package.json services/api/package.json
 RUN npm ci --omit=dev --workspace @kinetiq/${SERVICE} --include-workspace-root=false --ignore-scripts \
     && npm cache clean --force
 COPY --from=build /app/packages/contracts/dist packages/contracts/dist

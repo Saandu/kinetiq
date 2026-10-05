@@ -67,7 +67,7 @@ describe('real PostgreSQL tenant and service boundaries', () => {
 
   it('applies migrations and development seed repeatably', async () => {
     await migrate(admin); await seed(admin)
-    expect((await admin.query('SELECT * FROM migration.applied')).rowCount).toBe(3)
+    expect((await admin.query('SELECT * FROM migration.applied')).rowCount).toBe(4)
     expect((await admin.query('SELECT * FROM kinetiq.machines WHERE organization_id = $1', [DEMO_ORGANIZATION])).rowCount).toBe(DEMO_MACHINES.length)
   })
 
@@ -261,10 +261,10 @@ describe('migration safety', () => {
     const folder = await mkdtemp(join(tmpdir(), 'kinetiq-migration-failure-'))
     try {
       await cp(migrations, folder, { recursive: true })
-      await writeFile(join(folder, '0003_failure.sql'), 'CREATE TABLE kinetiq.failed_migration_probe (id int); SELECT missing_function();')
+      await writeFile(join(folder, '0004_failure.sql'), 'CREATE TABLE kinetiq.failed_migration_probe (id int); SELECT missing_function();')
       await expect(migrate(admin, folder)).rejects.toMatchObject({ code: '42883' })
       expect((await admin.query("SELECT to_regclass('kinetiq.failed_migration_probe') AS probe")).rows[0].probe).toBeNull()
-      expect((await admin.query("SELECT * FROM migration.applied WHERE name = '0003_failure.sql'")).rowCount).toBe(0)
+      expect((await admin.query("SELECT * FROM migration.applied WHERE name = '0004_failure.sql'")).rowCount).toBe(0)
     } finally { await rm(folder, { recursive: true, force: true }) }
   })
 
