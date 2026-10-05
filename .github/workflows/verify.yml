@@ -53,7 +53,7 @@ jobs:
       - run: npm run services:images
       - name: Verify the real local transport and recovery paths
         env:
-          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN_CI }}
         run: npm run test:pipeline
 
   deploy:

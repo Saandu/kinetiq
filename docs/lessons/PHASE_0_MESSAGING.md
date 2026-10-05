@@ -103,7 +103,7 @@ npm run test:pipeline
 
 The last command reads `LOCALSTACK_AUTH_TOKEN` from the root `.env.local` or the environment. Keep the token out of `apps/web` and Git. It fails clearly if the token is missing; it does not silently skip integration tests. The tests create temporary containers and remove them afterward.
 
-The ordinary test command covers frontend, contracts, database and worker unit tests. The separate pipeline command needs the LocalStack account token. Main-branch CI runs the pipeline before deployment; it needs a GitHub Actions secret named `LOCALSTACK_AUTH_TOKEN`. Referencing that secret in YAML does not upload your local token.
+The ordinary test command covers frontend, contracts, database and worker unit tests. The separate pipeline command needs the LocalStack account token. Main-branch CI runs the pipeline before deployment; it needs a dedicated CI Auth Token in a GitHub Actions secret named `LOCALSTACK_AUTH_TOKEN_CI`. The workflow maps that secret to the `LOCALSTACK_AUTH_TOKEN` environment variable expected by LocalStack. Your local developer token stays in root `.env.local`. Referencing the CI secret in YAML does not upload your local token.
 
 The integration tests demonstrate twelve batches reaching PostgreSQL, database failure followed by retry, duplicate delivery without duplicate rows, failed SQS handoff followed by MQTT redelivery, cross-device publishing denied by the broker, and poison-message redrive. They exercise the compiled service modules; container image checks separately verify packaging. A complete Compose environment and a running read API are still pending.
 
