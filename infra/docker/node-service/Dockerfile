@@ -42,6 +42,7 @@ COPY --from=build /app/packages/runtime/dist packages/runtime/dist
 COPY --from=build /app/packages/db/dist packages/db/dist
 COPY --from=build /app/packages/db/migrations packages/db/migrations
 COPY --from=build /app/services/${SERVICE}/dist services/${SERVICE}/dist
+COPY infra/local infra/local
 USER node
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \

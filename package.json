@@ -26,7 +26,10 @@
     "lint": "eslint apps/web packages services",
     "db:image": "docker build -t kinetiq-postgres:18.6-1 infra/docker/postgres",
     "test:pipeline": "npm run test:pipeline --workspace @kinetiq/pipeline-tests",
-    "services:images": "node scripts/build-service-images.mjs"
+    "services:images": "node scripts/build-service-images.mjs",
+    "local:up": "docker compose up --build -d --wait --wait-timeout 240",
+    "local:down": "docker compose down",
+    "local:verify": "node scripts/verify-local.mjs"
   },
   "devDependencies": {
     "@types/node": "24.19.1",

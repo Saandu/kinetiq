@@ -55,6 +55,16 @@ jobs:
         env:
           LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN_CI }}
         run: npm run test:pipeline
+      - name: Start the complete local application
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN_CI }}
+        run: |
+          node --input-type=module -e "import {writeFileSync} from 'node:fs'; const token=process.env.LOCALSTACK_AUTH_TOKEN; if(!token || /[\r\n]/.test(token)) throw new Error('CI LocalStack token missing or invalid'); writeFileSync('.env.local','LOCALSTACK_AUTH_TOKEN='+token+'\n',{mode:0o600});"
+          npm run local:up
+          npm run local:verify
+      - name: Stop local application
+        if: always()
+        run: docker compose down
 
   deploy:
     name: Deploy Firebase Hosting

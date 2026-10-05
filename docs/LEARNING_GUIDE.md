@@ -924,3 +924,7 @@ Try these now; it's fine not to know yet:
 | **X.509 certificate** | Standard digital identity document used in TLS |
 | **XSS** | Cross-site scripting: an attacker's JavaScript running in your page |
 | **Zod / Pydantic** | Runtime data validation for TypeScript / Python |
+
+The implemented local read API and complete Compose system are explained in
+[Phase 0: API and Compose](lessons/PHASE_0_API_AND_COMPOSE.md), including request
+validation, pooled tenant isolation, missing analytics and the real acceptance check.

@@ -33,6 +33,19 @@ in jsdom; it cannot prove layout, native focus behavior or mobile Safari support
 
 ## Review scope
 
-The app is a local simulation. Passing these checks does not validate industrial
-safety, backend authorization, real-time delivery or machine-learning accuracy.
-Those capabilities belong to a different system, not this public repository.
+The hosted app uses browser-local simulation. The Compose app uses fictional
+sensor values transported through actual MQTT, SQS, PostgreSQL and HTTP services.
+Backend integration tests cover local tenant isolation and delivery/recovery paths.
+These checks do not establish industrial safety, cloud authentication, prediction
+accuracy or production-scale performance.
+
+## Compose acceptance
+
+Run `npm run local:up`, then `npm run local:verify`. Open port 3101 rather than the
+browser-only development port 3100. Check both fleet pages, latest sensor values,
+missing analytics, disabled writes, settings/notification deep links and mobile
+navigation. Stop/start using `docker compose down` and `docker compose up -d --wait`;
+stored readings must remain available. Do not remove volumes during this check.
+
+The committed CI gate runs the same local acceptance script on trusted main pushes.
+Local checks do not imply the unpushed workflow has succeeded on GitHub.

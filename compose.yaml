@@ -1,0 +1,194 @@
+name: kinetiq
+
+x-api-image: &api-image
+  image: kinetiq-api:local
+  build:
+    context: .
+    dockerfile: infra/docker/node-service/Dockerfile
+    args: { SERVICE: api }
+
+x-node: &node
+  restart: unless-stopped
+  read_only: true
+  tmpfs: [/tmp]
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  healthcheck:
+    test: [CMD, node, -e, "fetch('http://127.0.0.1:8080/health/ready',{signal:AbortSignal.timeout(4000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+    interval: 5s
+    timeout: 5s
+    start_period: 20s
+    retries: 20
+
+services:
+  secrets:
+    <<: *api-image
+    user: '0:0'
+    network_mode: none
+    command: [node, infra/local/create-secrets.mjs]
+    healthcheck: { disable: true }
+    mem_limit: 128m
+    volumes:
+      - admin-secret:/secrets/admin
+      - api-secret:/secrets/api
+      - ingest-secret:/secrets/ingest
+      - mqtt-device-secret:/secrets/mqtt-device
+      - mqtt-bridge-secret:/secrets/mqtt-bridge
+      - queue-config:/secrets/queue
+
+  postgres:
+    image: kinetiq-postgres:18.6-1
+    build: infra/docker/postgres
+    restart: unless-stopped
+    mem_limit: 512m
+    environment:
+      POSTGRES_DB: kinetiq
+      POSTGRES_PASSWORD_FILE: /secrets/admin/password
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - admin-secret:/secrets/admin:ro
+    depends_on:
+      secrets: { condition: service_completed_successfully }
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U postgres -d kinetiq']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  localstack:
+    image: localstack/localstack:2026.09.0@sha256:801a3dff7f6a23857e7310b7602e67d52a29dfdcb03e09f7c608d5c57d24b792
+    restart: unless-stopped
+    mem_limit: 1g
+    env_file: .env.local
+    environment:
+      SERVICES: sqs,s3
+      SQS_ENDPOINT_STRATEGY: dynamic
+    ports: ['127.0.0.1:4566:4566']
+    healthcheck:
+      test: [CMD-SHELL, 'curl -fsS http://localhost:4566/_localstack/health > /dev/null']
+      interval: 5s
+      timeout: 3s
+      start_period: 30s
+      retries: 30
+
+  bootstrap:
+    <<: *api-image
+    command: [node, infra/local/bootstrap.mjs]
+    healthcheck: { disable: true }
+    mem_limit: 256m
+    depends_on:
+      postgres: { condition: service_healthy }
+      localstack: { condition: service_healthy }
+    volumes:
+      - admin-secret:/secrets/admin:ro
+      - api-secret:/secrets/api
+      - ingest-secret:/secrets/ingest
+      - queue-config:/secrets/queue
+
+  mosquitto:
+    image: eclipse-mosquitto:2.1.2-alpine@sha256:38c0da4f2ef84284d47b3b3eeea1cb3bdeabe81ee10caf0cd5c5ff61ee3ea408
+    restart: unless-stopped
+    mem_limit: 64m
+    entrypoint: [sh, /local/start-mosquitto.sh]
+    depends_on:
+      secrets: { condition: service_completed_successfully }
+    volumes:
+      - ./infra/local:/local:ro
+      - mqtt-device-secret:/secrets/mqtt-device:ro
+      - mqtt-bridge-secret:/secrets/mqtt-bridge:ro
+      - mqtt-data:/mosquitto/data
+    healthcheck:
+      test: [CMD-SHELL, 'mosquitto_sub -h 127.0.0.1 -u bridge -P "$$(cat /secrets/mqtt-bridge/password)" -t kinetiq/+/+/telemetry -C 1 -W 1 >/dev/null 2>&1; result=$$?; test $$result -eq 0 -o $$result -eq 27']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    <<: [*api-image, *node]
+    mem_limit: 256m
+    environment:
+      API_MODE: local-readonly
+      DEMO_ORGANIZATION_ID: 11111111-1111-4111-8111-111111111111
+      DATABASE_URL_FILE: /secrets/api/url
+    volumes: [api-secret:/secrets/api:ro]
+    depends_on:
+      bootstrap: { condition: service_completed_successfully }
+
+  ingest:
+    <<: *node
+    image: kinetiq-ingest:local
+    build:
+      context: .
+      dockerfile: infra/docker/node-service/Dockerfile
+      args: { SERVICE: ingest }
+    mem_limit: 192m
+    environment:
+      DATABASE_URL_FILE: /secrets/ingest/url
+      SQS_ENDPOINT: http://localstack:4566
+      SQS_QUEUE_URL_FILE: /secrets/queue/url
+    volumes: [ingest-secret:/secrets/ingest:ro, queue-config:/secrets/queue:ro]
+    depends_on:
+      bootstrap: { condition: service_completed_successfully }
+
+  local-bridge:
+    <<: *node
+    image: kinetiq-local-bridge:local
+    build:
+      context: .
+      dockerfile: infra/docker/node-service/Dockerfile
+      args: { SERVICE: local-bridge }
+    mem_limit: 128m
+    environment:
+      MQTT_URL: mqtt://mosquitto:1883
+      MQTT_BRIDGE_PASSWORD_FILE: /secrets/mqtt-bridge/password
+      SQS_ENDPOINT: http://localstack:4566
+      SQS_QUEUE_URL_FILE: /secrets/queue/url
+    volumes: [mqtt-bridge-secret:/secrets/mqtt-bridge:ro, queue-config:/secrets/queue:ro]
+    depends_on:
+      bootstrap: { condition: service_completed_successfully }
+      mosquitto: { condition: service_healthy }
+
+  simulator:
+    <<: *node
+    image: kinetiq-simulator:local
+    build:
+      context: .
+      dockerfile: infra/docker/node-service/Dockerfile
+      args: { SERVICE: simulator }
+    mem_limit: 128m
+    environment:
+      MQTT_URL: mqtt://mosquitto:1883
+      MQTT_DEVICE_PASSWORD_FILE: /secrets/mqtt-device/password
+      SITE_ID: 11111111-1111-4111-8111-111111111112
+      DEVICE_COUNT: '12'
+      PUBLISH_MS: '60000'
+    volumes: [mqtt-device-secret:/secrets/mqtt-device:ro]
+    depends_on:
+      local-bridge: { condition: service_healthy }
+      ingest: { condition: service_healthy }
+
+  web:
+    <<: *node
+    image: kinetiq-web:local
+    build:
+      context: .
+      dockerfile: infra/docker/web/Dockerfile
+    mem_limit: 128m
+    ports: ['127.0.0.1:3101:8080']
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, 'http://127.0.0.1:8080/healthz']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    depends_on:
+      api: { condition: service_healthy }
+
+volumes:
+  postgres-data:
+  mqtt-data:
+  admin-secret:
+  api-secret:
+  ingest-secret:
+  mqtt-device-secret:
+  mqtt-bridge-secret:
+  queue-config:

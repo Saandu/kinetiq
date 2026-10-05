@@ -12,8 +12,9 @@ Built by **[Alexandru Lungu](https://github.com/Saandu)** · Vue 3 · TypeScript
 
 This repository is a standalone 2026 portfolio project. All machine identities,
 locations, telemetry, thresholds and events are fictional and generated for the
-demo. It has no backend, database, authentication, credentials or runtime API
-calls.
+demo. The hosted demo uses browser-local data without authentication or API
+calls. This repository also implements a separate local backend using simulated
+devices, MQTT, SQS, PostgreSQL and a read API.
 
 ## Try it in two minutes
 
@@ -62,7 +63,7 @@ The public demo does not include the client's backend or machine-learning model.
 ### A small interface without a UI framework
 
 The application uses project-specific Vue components and hand-written CSS. That
-keeps the runtime dependency set limited to Vue, Pinia, Vue Router and vue-i18n,
+uses Vue, Pinia, Vue Router, vue-i18n and shared Zod contracts,
 and avoids shipping a general component or charting system for a compact,
 fixed-purpose interface. The cost is that accessibility and responsive behavior
 must be implemented and reviewed in the local components.
@@ -73,10 +74,11 @@ Telemetry reads and writes go through the `TelemetrySource` interface. The local
 deterministic telemetry source with namespaced `localStorage`, keeping storage
 details out of the UI.
 
-Only the local adapter is implemented. The contract is asynchronous; stores own
-loading, failure handling and protection against stale responses. Connecting a
-real service still requires an HTTP adapter and a backend. This repository does
-not yet ship Firestore, InfluxDB or MQTT adapters.
+The browser-local and same-origin HTTP adapters are implemented. Stores own
+loading, failure handling and protection against stale responses. The HTTP adapter
+reads PostgreSQL through Fastify and validates responses against shared contracts.
+The local backend is read-only; cloud authentication, writes and analytics remain
+planned. The hosted demo keeps its browser-local adapter.
 
 ### Deterministic simulation
 
@@ -163,7 +165,7 @@ The Vue app lives in `apps/web`. Run npm commands from the repository root: npm 
 
 `packages/db` contains the Drizzle schema, SQL migrations, seed and tenant-safe transaction/ingest helpers. Full verification requires Docker with Linux containers; it builds PostgreSQL 18.6 with pg_partman and pg_cron and runs disposable Testcontainers tests. See [database details](packages/db/README.md) and [the implementation lesson](docs/lessons/PHASE_0_DATABASE.md). The frontend can still run independently with `npm run dev`; it is not connected to this database yet.
 
-The local transport is implemented in `services/simulator`, `services/local-bridge` and `services/ingest`. Run `npm run services:images` to build and check their non-root production images. `npm run test:pipeline` starts disposable, authenticated Mosquitto, maintained LocalStack and PostgreSQL containers and verifies twelve-device delivery, retries, deduplication, broker ACLs and dead-letter redrive. This separate integration gate requires `LOCALSTACK_AUTH_TOKEN` in the root, Git-ignored `.env.local` or environment. Main-branch deployment now also requires its pipeline CI job and a dedicated CI Auth Token stored as the GitHub Actions secret `LOCALSTACK_AUTH_TOKEN_CI`; the workflow maps it to `LOCALSTACK_AUTH_TOKEN`. The local developer token is not uploaded automatically. See [the messaging lesson](docs/lessons/PHASE_0_MESSAGING.md). Read API, frontend backend integration and complete Compose acceptance remain pending.
+The local transport is implemented in `services/simulator`, `services/local-bridge` and `services/ingest`. Run `npm run services:images` to build and check their non-root production images. `npm run test:pipeline` starts disposable, authenticated Mosquitto, maintained LocalStack and PostgreSQL containers and verifies twelve-device delivery, retries, deduplication, broker ACLs and dead-letter redrive. This separate integration gate requires `LOCALSTACK_AUTH_TOKEN` in the root, Git-ignored `.env.local` or environment. Main-branch deployment now also requires its pipeline CI job and a dedicated CI Auth Token stored as the GitHub Actions secret `LOCALSTACK_AUTH_TOKEN_CI`; the workflow maps it to `LOCALSTACK_AUTH_TOKEN`. The local developer token is not uploaded automatically. See [the messaging lesson](docs/lessons/PHASE_0_MESSAGING.md). The read API, HTTP dashboard adapter and complete Compose acceptance are implemented. See [the API and Compose lesson](docs/lessons/PHASE_0_API_AND_COMPOSE.md).
 
 ## Verification and source tour
 
@@ -231,3 +233,24 @@ Reuse, modification and redistribution require prior written permission,
 except where applicable law or GitHub's Terms of Service permit otherwise.
 Third-party dependencies and materials retain their own licenses.
 See [LICENSE](LICENSE) for the full notice and permission requests.
+
+## Run the local backend
+
+With Docker Desktop running, put only the developer `LOCALSTACK_AUTH_TOKEN` in
+an ignored `.env.local` at the repository root. Then run:
+
+```sh
+npm run local:up
+npm run local:verify
+```
+
+Open http://127.0.0.1:3101. Twelve fictional devices publish through authenticated
+MQTT into SQS; ingest stores readings and the dashboard reads them through the
+local API. Analytics remain unavailable until a scorer exists. Availability is
+online share among received samples over 24 hours, not measured uptime during
+gaps. Backend controls are read-only; the browser-only demo keeps its local controls.
+
+`npm run local:down` stops the stack and preserves PostgreSQL and broker volumes.
+Local emulator queues are recreated on bootstrap. Do not use `down -v` when
+preserving local data. Images exclude env files and use pinned upstream digests.
+The API and database have no published ports; the web port binds to loopback.

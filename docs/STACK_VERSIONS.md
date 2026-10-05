@@ -52,3 +52,12 @@ TypeScript 7.0.2 is the native compiler for shared TypeScript packages and futur
 This follows [Microsoft's documented side-by-side setup](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/) and [Vue language-tools compatibility change](https://github.com/vuejs/language-tools/pull/6123). TypeScript 7.0 does not expose the compiler API used by Vue's template checker and typescript-eslint. `vue-tsc` 3.3.12 handles the compatibility package and preserves full template checks. This is a tooling boundary, not a reason to retain deprecated application patterns or rewrite Vue components. Remove the shim when both tools support the native API.
 
 Verified locally: `tsc --version` reports 7.0.2, `tsc6 --version` reports 6.0.3, native contracts checks/builds and Vue template checks pass. Deprecated `baseUrl` is removed; explicit `paths` resolve relative to the configuration file. CI runs both package checks through `npm run verify`.
+
+## Phase 0 API and web container
+
+Fastify 5.12.5, fastify-type-provider-zod 7.0.0, @fastify/swagger 9.9.1 and
+openapi-typescript 7.13.0 are exact npm pins checked when the API was introduced.
+The generated OpenAPI 3.1 contract is checked during builds. The local web server
+uses the maintained unprivileged Nginx stable image (verified `nginx/1.30.5`),
+pinned to `sha256:15c994d10d6d78658721c3bcafff14cb281fba2a4bdf9d5ba92c416a472516e3`.
+Its tag is descriptive; the immutable digest controls the actual image.

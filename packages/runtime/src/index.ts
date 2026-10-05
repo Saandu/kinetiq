@@ -1,4 +1,5 @@
 import { createServer } from 'node:http'
+import { readFileSync } from 'node:fs'
 import { setTimeout as pause } from 'node:timers/promises'
 import pino from 'pino'
 import { CreateQueueCommand, GetQueueAttributesCommand, SetQueueAttributesCommand, SQSClient } from '@aws-sdk/client-sqs'
@@ -54,7 +55,8 @@ export async function ensureLocalQueues(client: SQSClient, name = 'kinetiq-telem
 }
 
 export function requiredEnv(name: string): string {
-  const value = process.env[name]?.trim()
+  const file = process.env[`${name}_FILE`]
+  const value = (file ? readFileSync(file, 'utf8') : process.env[name])?.trim()
   if (!value) throw new Error(`Missing environment variable ${name}`)
   return value
 }
