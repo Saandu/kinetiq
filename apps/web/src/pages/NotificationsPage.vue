@@ -28,9 +28,9 @@ const pendingDismiss = ref<string | null>(null)
 
 const items = computed(() => fleet.selectedNotifications)
 
-function confirmDismiss() {
+async function confirmDismiss() {
   if (!pendingDismiss.value) return
-  fleet.dismissNotification(pendingDismiss.value)
+  if (!await fleet.dismissNotification(pendingDismiss.value)) return
   pendingDismiss.value = null
   ui.notify(t('notifications.dismissed'), 'neutral')
 }
@@ -44,14 +44,17 @@ function confirmDismiss() {
     />
 
     <PageBody>
-      <KCard v-if="!items.length" :padded="false">
+      <KCard v-if="fleet.selectedLoading && !items.length" :padded="true">
+        <p role="status">{{ t('data.loading') }}</p>
+      </KCard>
+      <KCard v-else-if="!fleet.selectedError && !items.length" :padded="false">
         <KEmptyState
           :title="t('notifications.empty.title')"
           :body="t('notifications.empty.body')"
         />
       </KCard>
 
-      <ul v-else class="feed">
+      <ul v-else-if="items.length" class="feed">
         <li v-for="item in items" :key="item.id">
           <KCard class="note">
             <div class="note__grid">

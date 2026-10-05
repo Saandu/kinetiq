@@ -1,10 +1,11 @@
 import { afterEach, beforeEach, vi } from 'vitest'
 import { createPinia, disposePinia, setActivePinia } from 'pinia'
 import { reloadTelemetrySource } from '../src/services/telemetryService'
+import { useFleetStore } from '../src/stores/fleet'
 
 let pinia: ReturnType<typeof createPinia>
 
-beforeEach(() => {
+beforeEach(async () => {
   localStorage.clear()
   reloadTelemetrySource()
   pinia = createPinia()
@@ -13,6 +14,7 @@ beforeEach(() => {
     matches: false, media: query, addEventListener: vi.fn(), removeEventListener: vi.fn(),
   })))
   vi.stubGlobal('scrollTo', vi.fn())
+  await useFleetStore().refresh()
 })
 
 afterEach(() => {

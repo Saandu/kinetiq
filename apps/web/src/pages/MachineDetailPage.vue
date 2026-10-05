@@ -39,7 +39,7 @@ const entryDate = ref('')
 const entryTime = ref('')
 const entryCategory = ref('')
 
-function addEntry() {
+async function addEntry() {
   if (!entryDate.value || !entryTime.value || !entryCategory.value) {
     ui.notify(t('machine.entryFailed'), 'bad')
     return
@@ -53,7 +53,7 @@ function addEntry() {
     ui.notify(t('machine.entryFuture'), 'bad')
     return
   }
-  fleet.addMaintenanceEntry(entryCategory.value as FaultCategory, at)
+  if (!await fleet.addMaintenanceEntry(entryCategory.value as FaultCategory, at)) return
   entryDate.value = ''
   entryTime.value = ''
   entryCategory.value = ''
@@ -65,22 +65,26 @@ function addEntry() {
 const maintenanceMode = computed({
   get: () => telemetry.value?.maintenanceMode ?? false,
   set: (on: boolean) => {
-    fleet.setMaintenanceMode(on)
-    ui.notify(
-      t(on ? 'machine.modeOn' : 'machine.modeOff', { mode: t('machine.maintenanceMode') }),
-      on ? 'good' : 'neutral'
-    )
+    void fleet.setMaintenanceMode(on).then((saved) => {
+      if (!saved) return
+      ui.notify(
+        t(on ? 'machine.modeOn' : 'machine.modeOff', { mode: t('machine.maintenanceMode') }),
+        on ? 'good' : 'neutral'
+      )
+    })
   },
 })
 
 const monitoringEnabled = computed({
   get: () => telemetry.value?.monitoringEnabled ?? false,
   set: (on: boolean) => {
-    fleet.setMonitoringEnabled(on)
-    ui.notify(
-      t(on ? 'machine.modeOn' : 'machine.modeOff', { mode: t('machine.monitoringEnabled') }),
-      on ? 'good' : 'neutral'
-    )
+    void fleet.setMonitoringEnabled(on).then((saved) => {
+      if (!saved) return
+      ui.notify(
+        t(on ? 'machine.modeOn' : 'machine.modeOff', { mode: t('machine.monitoringEnabled') }),
+        on ? 'good' : 'neutral'
+      )
+    })
   },
 })
 
@@ -103,13 +107,16 @@ function windowLabel(w: FaultWindow) {
     </AppTopbar>
 
     <PageBody>
-      <KCard v-if="!telemetry" :padded="false">
+      <KCard v-if="fleet.selectedLoading && !telemetry">
+        <p role="status">{{ t('data.loading') }}</p>
+      </KCard>
+      <KCard v-else-if="!fleet.selectedError && !telemetry" :padded="false">
         <KEmptyState :title="t('machine.notFound.title')" :body="t('machine.notFound.body')">
           <RouterLink to="/" class="recovery-link">{{ t('actions.back') }}</RouterLink>
         </KEmptyState>
       </KCard>
 
-      <template v-else>
+      <template v-else-if="telemetry">
         <!-- headline condition numbers -->
         <div class="kpis">
           <KCard>
@@ -277,7 +284,7 @@ function windowLabel(w: FaultWindow) {
                     {{ maintenanceMode ? t('metrics.active') : t('metrics.inactive') }}
                   </p>
                 </div>
-                <KSwitch v-model="maintenanceMode" :label="t('machine.maintenanceMode')" />
+                <KSwitch v-model="maintenanceMode" :disabled="fleet.writing || fleet.selectedLoading" :label="t('machine.maintenanceMode')" />
               </div>
 
               <div class="mode">
@@ -287,7 +294,7 @@ function windowLabel(w: FaultWindow) {
                     {{ monitoringEnabled ? t('metrics.active') : t('metrics.inactive') }}
                   </p>
                 </div>
-                <KSwitch v-model="monitoringEnabled" :label="t('machine.monitoringEnabled')" />
+                <KSwitch v-model="monitoringEnabled" :disabled="fleet.writing || fleet.selectedLoading" :label="t('machine.monitoringEnabled')" />
               </div>
             </div>
           </KCard>

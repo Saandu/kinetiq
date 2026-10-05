@@ -19,8 +19,8 @@ const settings = useSettingsStore()
 const ui = useUiStore()
 const router = useRouter()
 
-settings.load(fleet.selectedId)
-watch(() => fleet.selectedId, (id) => settings.load(id))
+void settings.load(fleet.selectedId)
+watch(() => fleet.selectedId, (id) => { void settings.load(id) })
 
 const stateSlots = computed(() => Array.from({ length: MAX_STATES }, (_, i) => i))
 
@@ -32,15 +32,14 @@ const alertFields = [
 
 const alertThresholdsValid = computed(() => validThresholds(settings.draft.alertThresholds))
 
-function save(which: 'states' | 'alerts') {
+async function save(which: 'states' | 'alerts') {
   if (which === 'alerts' && !alertThresholdsValid.value) {
     ui.notify(t('settings.invalidThresholds'), 'bad')
     return
   }
 
-  if (which === 'states') settings.saveStates()
-  else settings.saveAlertThresholds()
-  ui.notify(t('settings.saved'), 'good')
+  const saved = which === 'states' ? await settings.saveStates() : await settings.saveAlertThresholds()
+  if (saved) ui.notify(t('settings.saved'), 'good')
 }
 </script>
 
@@ -52,10 +51,15 @@ function save(which: 'states' | 'alerts') {
     />
 
     <PageBody>
+      <p v-if="settings.loading" role="status">{{ t('data.loading') }}</p>
+      <div v-if="settings.error" role="alert">
+        <p>{{ t(settings.error === 'load' ? 'data.loadFailed' : 'data.writeFailed') }}</p>
+        <KButton v-if="settings.error === 'load'" :disabled="settings.loading" @click="settings.load(fleet.selectedId)">{{ t('actions.retry') }}</KButton>
+      </div>
       <!-- state labels -->
       <KCard :title="t('settings.stateDescription')" :hint="t('settings.stateDescriptionHint')">
         <template #actions>
-          <KButton size="sm" variant="primary" @click="save('states')">
+          <KButton size="sm" variant="primary" :disabled="!settings.ready || settings.loading || settings.saving" @click="save('states')">
             {{ t('actions.save') }}
           </KButton>
         </template>
@@ -70,6 +74,7 @@ function save(which: 'states' | 'alerts') {
             <KInput
               :id="id"
               v-model="settings.draft.stateNames[i]"
+              :disabled="!settings.ready || settings.loading || settings.saving"
               :placeholder="t('states.default.' + (i + 1))"
             />
           </KField>
@@ -80,7 +85,7 @@ function save(which: 'states' | 'alerts') {
       <!-- alert thresholds -->
       <KCard :title="t('settings.alertSettings')" :hint="t('settings.alertSettingsHint')">
         <template #actions>
-          <KButton size="sm" variant="primary" @click="save('alerts')">
+          <KButton size="sm" variant="primary" :disabled="!settings.ready || settings.loading || settings.saving" @click="save('alerts')">
             {{ t('actions.save') }}
           </KButton>
         </template>
@@ -95,6 +100,7 @@ function save(which: 'states' | 'alerts') {
             <KInput
               :id="id"
               v-model.number="settings.draft.alertThresholds[field.key]"
+              :disabled="!settings.ready || settings.loading || settings.saving"
               type="number"
               min="0"
               max="100"
@@ -117,8 +123,8 @@ function save(which: 'states' | 'alerts') {
       <KCard :title="t('demo.badge')" :hint="t('demo.notice')">
         <KButton
           @click="
-            () => {
-              fleet.resetDemo()
+            async () => {
+              if (!await fleet.resetDemo()) return
               settings.reset()
               router.push('/')
               ui.notify(t('demo.resetDone'), 'neutral')

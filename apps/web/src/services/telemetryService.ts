@@ -58,24 +58,24 @@ export function defaultSettings(): MachineSettings {
 }
 
 export interface TelemetrySource {
-  listMachines(): Machine[]
-  listStatuses(now?: number): MachineStatus[]
-  getTelemetry(id: string, now?: number): MachineTelemetry | null
-  listNotifications(id: string, now?: number): MachineNotification[]
+  listMachines(): Promise<Machine[]>
+  listStatuses(now?: number): Promise<MachineStatus[]>
+  getTelemetry(id: string, now?: number): Promise<MachineTelemetry | null>
+  listNotifications(id: string, now?: number): Promise<MachineNotification[]>
 
-  removeMachine(id: string): void
-  restoreAllMachines(): void
+  removeMachine(id: string): Promise<void>
+  restoreAllMachines(): Promise<void>
 
-  dismissNotification(id: string): void
+  dismissNotification(id: string): Promise<void>
 
-  setMaintenanceMode(id: string, on: boolean): void
-  setMonitoringEnabled(id: string, on: boolean): void
+  setMaintenanceMode(id: string, on: boolean): Promise<void>
+  setMonitoringEnabled(id: string, on: boolean): Promise<void>
 
-  getSettings(id: string): MachineSettings
-  saveSettings(id: string, settings: MachineSettings): void
+  getSettings(id: string): Promise<MachineSettings>
+  saveSettings(id: string, settings: MachineSettings): Promise<void>
 
-  listMaintenanceEntries(id: string): MaintenanceEntry[]
-  addMaintenanceEntry(id: string, category: FaultCategory, at: number): MaintenanceEntry
+  listMaintenanceEntries(id: string): Promise<MaintenanceEntry[]>
+  addMaintenanceEntry(id: string, category: FaultCategory, at: number): Promise<MaintenanceEntry>
 }
 
 class LocalTelemetrySource implements TelemetrySource {
@@ -98,17 +98,17 @@ class LocalTelemetrySource implements TelemetrySource {
     writeJson('overrides', this.overrides)
   }
 
-  listMachines(): Machine[] {
+  async listMachines(): Promise<Machine[]> {
     return MACHINES.filter((m) => !this.overrides.hiddenMachines.includes(m.id))
   }
 
-  listStatuses(now = Date.now()): MachineStatus[] {
-    return allMachineStatuses(now, (id) => this.getSettings(id).alertThresholds).filter(
+  async listStatuses(now = Date.now()): Promise<MachineStatus[]> {
+    return allMachineStatuses(now, (id) => this.readSettings(id).alertThresholds).filter(
       (s) => !this.overrides.hiddenMachines.includes(s.id)
     )
   }
 
-  getTelemetry(id: string, now = Date.now()): MachineTelemetry | null {
+  async getTelemetry(id: string, now = Date.now()): Promise<MachineTelemetry | null> {
     if (!MACHINES.some((m) => m.id === id)) return null
     if (this.overrides.hiddenMachines.includes(id)) return null
 
@@ -119,58 +119,62 @@ class LocalTelemetrySource implements TelemetrySource {
     return telemetry
   }
 
-  listNotifications(id: string, now = Date.now()): MachineNotification[] {
-    return machineNotifications(id, now, this.getSettings(id).alertThresholds).filter(
+  async listNotifications(id: string, now = Date.now()): Promise<MachineNotification[]> {
+    return machineNotifications(id, now, this.readSettings(id).alertThresholds).filter(
       (n) => !this.overrides.dismissedNotifications.includes(n.id)
     )
   }
 
-  removeMachine(id: string): void {
+  async removeMachine(id: string): Promise<void> {
     if (!this.overrides.hiddenMachines.includes(id)) {
       this.overrides.hiddenMachines.push(id)
       this.persist()
     }
   }
 
-  restoreAllMachines(): void {
+  async restoreAllMachines(): Promise<void> {
     this.overrides.hiddenMachines = []
     this.overrides.dismissedNotifications = []
     this.persist()
   }
 
-  dismissNotification(id: string): void {
+  async dismissNotification(id: string): Promise<void> {
     if (!this.overrides.dismissedNotifications.includes(id)) {
       this.overrides.dismissedNotifications.push(id)
       this.persist()
     }
   }
 
-  setMaintenanceMode(id: string, on: boolean): void {
+  async setMaintenanceMode(id: string, on: boolean): Promise<void> {
     this.overrides.modes[id] = { ...this.overrides.modes[id], maintenance: on }
     this.persist()
   }
 
-  setMonitoringEnabled(id: string, on: boolean): void {
+  async setMonitoringEnabled(id: string, on: boolean): Promise<void> {
     this.overrides.modes[id] = { ...this.overrides.modes[id], monitoring: on }
     this.persist()
   }
 
-  getSettings(id: string): MachineSettings {
+  private readSettings(id: string): MachineSettings {
     return normalizeSettings(this.overrides.settings[id])
   }
 
-  saveSettings(id: string, settings: MachineSettings): void {
+  async getSettings(id: string): Promise<MachineSettings> {
+    return this.readSettings(id)
+  }
+
+  async saveSettings(id: string, settings: MachineSettings): Promise<void> {
     this.overrides.settings[id] = normalizeSettings(settings)
     this.persist()
   }
 
-  listMaintenanceEntries(id: string): MaintenanceEntry[] {
+  async listMaintenanceEntries(id: string): Promise<MaintenanceEntry[]> {
     return this.overrides.entries
       .filter((e) => e.machineId === id)
       .sort((a, b) => b.at - a.at)
   }
 
-  addMaintenanceEntry(id: string, category: FaultCategory, at: number): MaintenanceEntry {
+  async addMaintenanceEntry(id: string, category: FaultCategory, at: number): Promise<MaintenanceEntry> {
     const entry: MaintenanceEntry = {
       id: crypto.randomUUID(),
       machineId: id,

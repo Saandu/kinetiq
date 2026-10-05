@@ -1,4 +1,10 @@
 export default {
+  data: {
+    loading: 'Loading machine data…',
+    loadFailed: 'Machine data could not be loaded. Any displayed values are from the last successful refresh.',
+    writeFailed: 'The change could not be saved. Please try it again.',
+  },
+
   app: {
     descriptor: 'Condition Monitoring',
     tagline: 'Condition monitoring for industrial machines',

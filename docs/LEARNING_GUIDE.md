@@ -177,6 +177,20 @@ listMachines(): Promise<Machine[]>   // "I'll give you the machines later, or an
 
 Every store that calls it must `await` it and handle three states: *loading*, *loaded*, *failed*. That's Phase 0, and we do it *before* writing any backend code, keeping `LocalTelemetrySource` (wrapped in `Promise.resolve`) so all existing tests keep proving nothing broke. A production habit: **change one thing at a time, with tests green at each step.**
 
+### Phase 0a implementation: where asynchronous state belongs
+
+The Vue app now lives in `apps/web`. A **workspace** is a package inside one repository: npm links its dependencies and uses the root lockfile so CI installs the same versions. Run commands from the repository root; Firebase publishes `apps/web/dist`.
+
+Every TelemetrySource method returns a Promise, including local reads and writes. The local adapter still simulates all data in the browser. No HTTP adapter or backend is delivered by this change.
+
+A computed getter must remain synchronous: it reads a resolved snapshot. The fleet store performs requests in actions and stores their results in refs. Roster and selected-machine requests have separate loading/error state. A **request generation** is a counter attached to each request: when navigation starts a newer request, an old response is ignored. This prevents a slow pump response overwriting the mill currently on screen.
+
+Polling still uses one shared visibility-aware timer. It does not start another poll while the previous request or a fleet write is pending, and the store stops its timer/listener on disposal. Explicit navigation can supersede an in-flight selection request.
+
+Writes are awaited. A failed write keeps the previous telemetry and settings draft; a success toast appears only after the adapter confirms completion. Settings saves capture the intended panel and merge it with saved settings so saving state names does not commit unsaved alert thresholds. Settings cannot be saved until the requested machine's settings have loaded. With a future remote API, atomic panel updates and concurrency control must also be enforced server-side.
+
+Try `npm run dev`: change a state name, save only that panel, toggle maintenance, refresh a machine deep link and reset demo data. The failure and stale-response scenarios are tested with deliberately delayed/rejected adapters in `apps/web/tests/async-telemetry.test.ts`.
+
 ## 2.7 The command line
 
 Backend and DevOps work happens mostly in a terminal. You'll use: `docker` / `docker compose` (containers), `kubectl` (talk to Kubernetes), `helm` (install charts), `k3d` (local clusters), `psql` (talk to Postgres), `aws` (AWS CLI), `cdk` (infrastructure), `uv` (Python), `npm`, `git`, `curl` (send HTTP requests by hand). Every time we use a new command I'll explain what it does and what its output means.

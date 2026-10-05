@@ -1,6 +1,6 @@
 import { computed, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { telemetry } from '@/services/telemetryService'
+import { useFleetStore } from '@/stores/fleet'
 import { MAX_STATES } from '@/services/simulator'
 
 /**
@@ -11,10 +11,11 @@ import { MAX_STATES } from '@/services/simulator'
  */
 export function useStateLabels(machineId: Ref<string>, revision?: Ref<number>) {
   const { t } = useI18n()
+  const fleet = useFleetStore()
 
   return computed(() => {
     void revision?.value
-    const custom = machineId.value ? telemetry().getSettings(machineId.value).stateNames : []
+    const custom = machineId.value === fleet.selectedId ? fleet.selectedSettings.stateNames : []
 
     return Array.from({ length: MAX_STATES }, (_, i) => {
       const override = custom[i]?.trim()

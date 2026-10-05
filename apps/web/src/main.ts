@@ -19,13 +19,18 @@ app.use(i18n)
  * installed so the guard runs on the very first navigation -- otherwise a
  * cold load of a machine route would render before anything is selected.
  */
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
+  const fleet = useFleetStore()
+  if (!fleet.loaded && !await fleet.loadFleet()) {
+    if (typeof to.params.id === 'string') await fleet.select(to.params.id)
+    return true // Keep the route so the load error can be retried.
+  }
   const id = to.params.id
   if (typeof id === 'string' && id) {
     if (!useFleetStore().machines.some((machine) => machine.id === id)) {
       return { name: 'not-found', params: { pathMatch: to.path.slice(1).split('/') }, replace: true }
     }
-    useFleetStore().select(id)
+    await fleet.select(id)
   }
 })
 

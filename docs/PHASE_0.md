@@ -39,3 +39,13 @@ Open http://localhost:3100. Check the dashboard, a machine deep link, settings a
 Node 24.21.0 was downloaded into the ignored `.tools` directory and verified against the official SHA-256 checksum list for local checks. This does not replace the system-wide Node installation; `.nvmrc` selects the required release for developers and CI.
 
 Docker is not installed on this Windows host. Database integration, image builds and the Compose acceptance check remain pending until a Docker engine is available. No cloud resources are required for Phase 0.
+
+## Verified progress, 5 October 2026
+
+- Plan and guide committed; full scope preserved.
+- Workspace move: 34 existing tests passed and all 19 built files were byte-identical to the pre-move output.
+- Dependencies: Node 24.21.0 used for checks; current frontend stable releases pinned; TypeScript 6.0.3 retained for Vue compiler compatibility. Full npm audit reported zero vulnerabilities.
+- Async data seam: 42 tests passed; Vue type checks and Vite build passed. Browser smoke checks covered dashboard, machine selection, maintenance toggle/reload, settings save/reload, 390px overflow and mobile Escape close. Browser console had no warnings/errors. Local QA changes were reset.
+- The hosted demo remains on its local source. These commits have not been pushed or deployed.
+
+Next: telemetry contracts, then real PostgreSQL integration and containers. Phase 0 is not complete until the Compose acceptance check passes against real dependencies.

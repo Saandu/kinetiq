@@ -657,7 +657,7 @@ The portfolio currently says Kinetiq has "34 tests, 4 runtime dependencies" and 
 
 ## 18. Working rules for the coding agent
 
-- Read this file, `LEARNING_GUIDE.md`, the README, `docs/DEPLOYMENT.md`, `docs/VERIFICATION.md`, `src/services/telemetryService.ts`, `src/services/simulator.ts`, `src/types/telemetry.ts` and the tests before writing code.
+- Read this file, `LEARNING_GUIDE.md`, the README, `docs/DEPLOYMENT.md`, `docs/VERIFICATION.md`, `apps/web/src/services/telemetryService.ts`, `apps/web/src/services/simulator.ts`, `apps/web/src/types/telemetry.ts` and the tests before writing code.
 - I am learning backend and DevOps through this project. Before each step, explain what we are building and why in plain language; explain each new concept the first time it appears in code; after each step, give me something to try by hand and a few interview-style questions. Add anything new to `LEARNING_GUIDE.md`.
 - Plan each phase as a list of files and commits, show it to me, then implement in small commits with clear messages explaining why.
 - Run every gate (lint, types, tests in both languages, image builds, helm lint, `cdk synth` + nag) before each commit.

@@ -51,14 +51,14 @@ watch(rows, (list) => {
 })
 
 function openMachine(id: string) {
-  fleet.select(id)
+  void fleet.select(id)
   router.push(`/machines/${id}`)
 }
 
-function confirmRemoval() {
+async function confirmRemoval() {
   const id = pendingRemoval.value
   if (!id) return
-  fleet.removeMachine(id)
+  if (!await fleet.removeMachine(id)) return
   pendingRemoval.value = null
   ui.notify(t('dashboard.removed', { id }), 'neutral')
 }
@@ -98,7 +98,7 @@ function confirmRemoval() {
 
       <KCard v-if="!rows.length" :padded="false">
         <KEmptyState :title="t('dashboard.empty.title')" :body="t('dashboard.empty.body')">
-          <KButton variant="primary" @click="fleet.restoreMachines()">
+          <KButton variant="primary" :disabled="fleet.writing" @click="fleet.restoreMachines()">
             {{ t('dashboard.empty.action') }}
           </KButton>
         </KEmptyState>

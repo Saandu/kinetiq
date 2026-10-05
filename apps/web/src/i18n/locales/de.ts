@@ -1,4 +1,10 @@
 export default {
+  data: {
+    loading: 'Maschinendaten werden geladen…',
+    loadFailed: 'Maschinendaten konnten nicht geladen werden. Angezeigte Werte stammen aus der letzten erfolgreichen Aktualisierung.',
+    writeFailed: 'Die Änderung konnte nicht gespeichert werden. Bitte erneut versuchen.',
+  },
+
   app: {
     descriptor: 'Zustandsüberwachung',
     tagline: 'Zustandsüberwachung für Industriemaschinen',

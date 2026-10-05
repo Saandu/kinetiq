@@ -73,9 +73,10 @@ Telemetry reads and writes go through the `TelemetrySource` interface. The local
 deterministic telemetry source with namespaced `localStorage`, keeping storage
 details out of the UI.
 
-Only the local adapter is implemented. Connecting a real service would require
-an adapter and appropriate asynchronous, loading and failure handling; this
-repository does not claim to ship Firestore, InfluxDB or MQTT adapters.
+Only the local adapter is implemented. The contract is asynchronous; stores own
+loading, failure handling and protection against stale responses. Connecting a
+real service still requires an HTTP adapter and a backend. This repository does
+not yet ship Firestore, InfluxDB or MQTT adapters.
 
 ### Deterministic simulation
 
@@ -87,9 +88,9 @@ always contains a useful mix of healthy, warning, critical and offline states.
 
 ### One shared clock
 
-A ref-counted timer updates one reactive timestamp for the whole application.
-All live values derive from that timestamp, and updates pause while the tab is
-hidden. Individual pages do not create polling loops.
+A ref-counted timer updates one reactive timestamp and refreshes resolved
+telemetry snapshots for the whole application. Polls do not overlap and updates
+pause while the tab is hidden. Individual pages do not create polling loops.
 
 ### Visualisation follows the comparison
 
@@ -169,6 +170,8 @@ pull requests cannot deploy. See [deployment details](docs/DEPLOYMENT.md).
 The tests cover independent settings saves, immediate severity updates, invalid
 thresholds, deterministic data, persistence and reset, blocked/corrupt storage,
 shared timer cleanup, hidden-tab behavior and mobile drawer focus/scroll recovery.
+Async tests also cover stale responses after navigation, failed reads and writes,
+retry, duplicate-write prevention, settings drafts and success notifications.
 
 They also cover the interface primitives, because the accessibility claims above
 are the kind that quietly stop being true: that a field label is wired to the
