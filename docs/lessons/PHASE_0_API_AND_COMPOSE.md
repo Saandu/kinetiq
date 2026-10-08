@@ -180,9 +180,47 @@ docker compose exec postgres psql -U postgres -d kinetiq -c "SELECT machine_id, 
 ```
 
 `npm run local:verify` compares API sensor values with their exact PostgreSQL rows
-for every device. It also checks deep links and refused writes. CI adds the same
+for every device. Each latest reading must be at most two minutes old, so old
+rows cannot hide a stopped transport. It also checks deep links and refused writes. CI adds the same
 Compose gate on trusted main pushes, using `LOCALSTACK_AUTH_TOKEN_CI`. It creates
 an ephemeral ignored env file for that runner; no token enters the frontend build.
+
+## Restarting the same container
+
+A fresh container and a restarted container are different tests. The broker's
+startup script creates `/tmp/passwords` and `/tmp/acl`, then gives the Mosquitto
+user ownership and mode `600` (only that owner can read and write). On a restart,
+those generated files can still exist. The root startup process then tried to
+overwrite a broker-owned password file in `/tmp`, and failed with "File exists".
+The broker stayed down, so the simulator and bridge also lost their MQTT server.
+Recreating the container hid the problem by giving it a fresh filesystem.
+
+The script now removes only those two derived files before regenerating them
+from the mounted secrets. `umask 077` restricts new files from creation, before
+the final ownership/mode adjustment. Broker persistence in `/mosquitto/data`
+and the secret volumes are untouched. Missing secrets still fail startup; we
+do not fall back to anonymous connections or default credentials.
+
+LocalStack is a separate recovery case: our local queue emulator loses its
+queues when its process restarts. Bootstrap recreates them, but Compose may
+reject workers that are already marked unhealthy before waiting for their
+recovery. After a Docker-engine restart, run `docker compose up -d bootstrap`,
+wait for that setup job to finish successfully, restart `ingest` and
+`local-bridge`, then run `docker compose up -d --wait` and the acceptance check.
+This is a local-emulator limitation; a real SQS queue survives an application
+restart. PostgreSQL rows and broker persistence remain in their named volumes.
+
+`broker-restart.test.ts` uses the actual script and configuration, writes a
+retained MQTT message, gracefully restarts the same container twice, then checks
+authenticated delivery and file permissions. A retained message is stored by
+the broker and sent to a new subscriber; it gives us observable persistence
+evidence across a graceful restart. This does not prove recovery from sudden
+power loss or replace the planned database backup/restore drill.
+
+Try `docker compose restart mosquitto`, then `docker compose ps` and
+`npm run local:verify`. The bridge should reconnect; allow the simulator its
+normal publishing interval. Why would `down` followed by `up` miss a bug that
+`restart` catches? Which files can we recreate, and which must we preserve?
 
 ## Explain it back
 

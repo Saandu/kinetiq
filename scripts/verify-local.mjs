@@ -11,13 +11,15 @@ async function json(path) {
 }
 const machines = machineListSchema.parse(await json('/v1/machines'))
 assert.equal(machines.length, 12)
+// Existing rows alone could hide a stalled simulator, bridge or ingest worker.
+const fresh = row => row.latestReading && row.samples > 0 && row.latestReading.at >= Date.now() - 120_000
 let readings = []
 for (let attempt = 0; attempt < 40; attempt++) {
   readings = await Promise.all(machines.map(async ({ id }) => machineTelemetrySchema.parse(await json(`/v1/machines/${id}/telemetry`))))
-  if (readings.every(row => row.latestReading && row.samples > 0)) break
+  if (readings.every(fresh)) break
   await wait(2000)
 }
-assert.ok(readings.every(row => row.latestReading && row.samples > 0), 'Every registered device must reach the API')
+assert.ok(readings.every(fresh), 'Every registered device must have a persisted reading from the last two minutes')
 for (const row of readings) {
   const reading = row.latestReading
   assert.ok(reading)
