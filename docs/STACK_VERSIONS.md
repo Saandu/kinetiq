@@ -55,6 +55,13 @@ Verified locally: `tsc --version` reports 7.0.2, `tsc6 --version` reports 6.0.3,
 
 ## Phase 0 API and web container
 
+On 8 October 2026, the resumed audit identified
+[GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q)
+in the transitive `source-map-js` 1.2.1 dependency. Its existing semver ranges
+accept the patched 1.2.2 release, so a targeted update changes only that
+lockfile entry. This preserves the selected application versions while removing
+the reported indexed-source-map denial-of-service issue.
+
 Fastify 5.12.5, fastify-type-provider-zod 7.0.0, @fastify/swagger 9.9.1 and
 openapi-typescript 7.13.0 are exact npm pins checked when the API was introduced.
 The generated OpenAPI 3.1 contract is checked during builds. The local web server
