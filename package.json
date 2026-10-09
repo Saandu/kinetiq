@@ -29,7 +29,15 @@
     "services:images": "node scripts/build-service-images.mjs",
     "local:up": "docker compose up --build -d --wait --wait-timeout 240",
     "local:down": "docker compose down",
-    "local:verify": "node scripts/verify-local.mjs"
+    "local:verify": "node scripts/verify-local.mjs",
+    "k8s:tools": "node scripts/setup-k8s-tools.mjs",
+    "k8s:up": "node scripts/k8s-cluster.mjs up",
+    "k8s:stop": "node scripts/k8s-cluster.mjs stop",
+    "k8s:status": "node scripts/k8s-cluster.mjs status",
+    "k8s:verify": "node scripts/k8s-cluster.mjs verify",
+    "k8s:images": "node scripts/k8s-cluster.mjs images",
+    "k8s:images:verify": "node scripts/k8s-cluster.mjs images-verify",
+    "k8s:kubectl": "node scripts/k8s-cluster.mjs kubectl"
   },
   "devDependencies": {
     "@types/node": "24.19.1",

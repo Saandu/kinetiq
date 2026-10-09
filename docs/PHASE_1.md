@@ -66,5 +66,23 @@ queue recreation and unhealthy-worker recovery are documented in the lesson.
 The audit also identified `source-map-js` 1.2.1; its lockfile entry is updated
 to the patched 1.2.2 release. No unrelated packages were upgraded.
 
-Kubernetes resources and tools are not yet implemented or verified. No cloud
-resources have been created.
+The local cluster foundation is implemented on 9 October 2026. Checksum-verified
+k3d 5.9.0, kubectl 1.36.5 and Helm 4.3.0 are installed under ignored `.tools/k8s`
+on D:. k3s 1.36.5 is pinned by digest and selected against the CloudNativePG,
+KEDA and Helm support matrices. The single node and all four system Deployments
+passed readiness checks before and after a stop/start cycle. All six application
+images were imported and remained present after restart. The default kubeconfig
+remained absent; API and future ingress bindings are loopback-only.
+
+Observed server memory was 623–810 MiB, plus about 16 MiB for the k3d proxy.
+The configured node cap is 8 GiB, but this Docker WSL VM currently provides only
+6.7 GiB total. Increase that allocation before running the full stack. These are
+foundation observations, not a full-stack memory or availability result.
+Application Helm objects and operators are the next steps. No cloud resources
+have been created. See [the cluster lesson](lessons/PHASE_1_CLUSTER.md).
+
+This checkpoint also passed the database image build, lint, all workspace builds
+and type checks, 125 package tests, six transport tests and Compose acceptance.
+All four Node images passed production import and non-root identity checks.
+Helm can query the local cluster's existing system releases; application chart
+lint/render checks start when the chart exists in the next step.

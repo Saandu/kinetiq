@@ -10,7 +10,8 @@ Node follows LTS. PostgreSQL follows supported stable majors. Python and most pl
 | npm | 11.19.0, bundled with Node | Node release index above |
 | PostgreSQL | 18.6 | [Supported versions](https://www.postgresql.org/support/versioning/); 19 is still prerelease |
 | Python | 3.14.8 | [Python downloads](https://www.python.org/downloads/); 3.15 is still prerelease |
-| k3s | 1.37.1+k3s1 | [Release](https://github.com/k3s-io/k3s/releases/tag/v1.37.1%2Bk3s1) |
+| k3s | 1.36.5+k3s1, operator-compatible baseline | [Release](https://github.com/k3s-io/k3s/releases/tag/v1.36.5%2Bk3s1) |
+| kubectl | 1.36.5, matches the local server minor | [Official binaries](https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/) |
 | k3d | 5.9.0 | [Release](https://github.com/k3d-io/k3d/releases/tag/v5.9.0) |
 | Helm | 4.3.0 | [Release](https://github.com/helm/helm/releases/tag/v4.3.0) |
 | Argo CD | 3.5.3 | [Release](https://github.com/argoproj/argo-cd/releases/tag/v3.5.3) |
@@ -30,6 +31,18 @@ Node follows LTS. PostgreSQL follows supported stable majors. Python and most pl
 Frontend and TypeScript dependencies are checked against the npm registry's stable `latest` tag and locked in the root package-lock.json. `@types/node` must match Node 24, rather than the newest Node major. Backend dependencies receive the same check when their packages are created. Python dependencies are resolved and locked together against Python 3.14 when analytics begins; the ARM wheel availability and test results must be checked then.
 
 Platform versions are not Helm chart versions unless explicitly labelled. During Phase 1, verify the Kubernetes support matrix of every operator and the k3d/k3s pairing, resolve exact chart versions, render and test them together. A newer release alone does not prove compatibility.
+
+## Phase 1 local cluster selection
+
+Rechecked 9 October 2026: k3d 5.9.0 and Helm 4.3.0 remain the selected current
+releases. Kubernetes 1.36.5 is the supported intersection of
+[CloudNativePG 1.30's matrix](https://cloudnative-pg.io/docs/1.30/supported_releases/),
+[KEDA 2.21's tested versions](https://keda.sh/docs/2.21/operate/cluster/) and
+[Helm 4.3's support policy](https://helm.sh/docs/topics/version_skew/).
+The newer k3s 1.37.1 is therefore not the local baseline. Other operators must
+still pass their own chart compatibility and installation checks when introduced.
+Windows x64 tool artifacts and their SHA-256 hashes are pinned in
+`infra/k8s/local/tools.json`. The k3s image is pinned in the local cluster YAML.
 
 ## Database image compatibility
 

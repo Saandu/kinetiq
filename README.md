@@ -254,3 +254,21 @@ gaps. Backend controls are read-only; the browser-only demo keeps its local cont
 Local emulator queues are recreated on bootstrap. Do not use `down -v` when
 preserving local data. Images exclude env files and use pinned upstream digests.
 The API and database have no published ports; the web port binds to loopback.
+
+## Local Kubernetes foundation
+
+With Docker Desktop running on Windows x64:
+
+```sh
+npm run k8s:tools
+npm run k8s:up
+npm run k8s:images
+npm run k8s:verify
+```
+
+Tools and cluster credentials are stored in ignored `.tools/k8s` on the repository
+drive. Setup verifies pinned download checksums. The single k3d node has an 8 GiB
+memory cap; API and future ingress ports bind to loopback. `npm run k8s:stop`
+preserves the cluster; `npm run k8s:up` starts it again. Application deployment,
+operators and backup restoration are subsequent Phase 1 steps. The dashboard
+currently runs through Compose. See the [cluster lesson](docs/lessons/PHASE_1_CLUSTER.md).

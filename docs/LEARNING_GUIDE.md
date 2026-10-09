@@ -928,3 +928,6 @@ Try these now; it's fine not to know yet:
 The implemented local read API and complete Compose system are explained in
 [Phase 0: API and Compose](lessons/PHASE_0_API_AND_COMPOSE.md), including request
 validation, pooled tenant isolation, missing analytics and the real acceptance check.
+
+Continue with [Phase 1: local Kubernetes](lessons/PHASE_1_CLUSTER.md) for tool
+installation, cluster credentials, image imports, memory limits and restart practice.
