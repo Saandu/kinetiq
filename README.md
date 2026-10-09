@@ -163,7 +163,7 @@ The Vue app lives in `apps/web`. Run npm commands from the repository root: npm 
 
 `packages/contracts` defines and validates v1 telemetry batches and generates their JSON Schema. Its source and tests use TypeScript 7. Vue and ESLint retain the maintained TypeScript 6 compatibility API until their tooling supports the native API; see [the verified stack setup](docs/STACK_VERSIONS.md).
 
-`packages/db` contains the Drizzle schema, SQL migrations, seed and tenant-safe transaction/ingest helpers. Full verification requires Docker with Linux containers; it builds PostgreSQL 18.6 with pg_partman and pg_cron and runs disposable Testcontainers tests. See [database details](packages/db/README.md) and [the implementation lesson](docs/lessons/PHASE_0_DATABASE.md). The frontend can still run independently with `npm run dev`; it is not connected to this database yet.
+`packages/db` contains the Drizzle schema, SQL migrations, seed and tenant-safe transaction/ingest helpers. Full verification requires Docker with Linux containers; it builds PostgreSQL 18.6 with pg_partman and pg_cron and runs disposable Testcontainers tests. See [database details](packages/db/README.md) and [the implementation lesson](docs/lessons/PHASE_0_DATABASE.md). The frontend can run independently with `npm run dev` using browser simulation; Compose connects it to PostgreSQL through the read API.
 
 The local transport is implemented in `services/simulator`, `services/local-bridge` and `services/ingest`. Run `npm run services:images` to build and check their non-root production images. `npm run test:pipeline` starts disposable, authenticated Mosquitto, maintained LocalStack and PostgreSQL containers and verifies twelve-device delivery, retries, deduplication, broker ACLs and dead-letter redrive. This separate integration gate requires `LOCALSTACK_AUTH_TOKEN` in the root, Git-ignored `.env.local` or environment. Main-branch deployment now also requires its pipeline CI job and a dedicated CI Auth Token stored as the GitHub Actions secret `LOCALSTACK_AUTH_TOKEN_CI`; the workflow maps it to `LOCALSTACK_AUTH_TOKEN`. The local developer token is not uploaded automatically. See [the messaging lesson](docs/lessons/PHASE_0_MESSAGING.md). The read API, HTTP dashboard adapter and complete Compose acceptance are implemented. See [the API and Compose lesson](docs/lessons/PHASE_0_API_AND_COMPOSE.md).
 
@@ -269,8 +269,8 @@ npm run k8s:verify
 Tools and cluster credentials are stored in ignored `.tools/k8s` on the repository
 drive. Setup verifies pinned download checksums. The single k3d node has an 8 GiB
 memory cap; API and future ingress ports bind to loopback. `npm run k8s:stop`
-preserves the cluster; `npm run k8s:up` starts it again. Application deployment,
-operators and backup restoration are subsequent Phase 1 steps. The dashboard
+preserves the cluster; `npm run k8s:up` starts it again. Application deployment
+is a subsequent Phase 1 step. The dashboard
 currently runs through Compose. See the [cluster lesson](docs/lessons/PHASE_1_CLUSTER.md).
 
 The application chart can now be checked without starting Kubernetes:
@@ -285,3 +285,22 @@ memory-budget checks. The smoke command also checks Nginx configuration in the
 real web image. The chart requires database/platform provisioning before it can
 run the full pipeline; rendered objects do not establish runtime readiness or
 policy enforcement. See the [Helm lesson](docs/lessons/PHASE_1_HELM.md).
+
+The local database operators and recovery drill are now implemented:
+
+```sh
+docker compose stop
+npm run k8s:up
+npm run k8s:images
+npm run k8s:operators
+npm run k8s:database
+npm run k8s:database:verify
+```
+
+The drill checks verified TLS, tenant isolation, extensions, partitions and
+identical telemetry after an S3 restore onto a fresh volume, then checks Pod
+replacement on the retained source volume. It leaves the source database intact.
+LocalStack Hobby S3 is ephemeral across emulator restarts; a local PVC does not
+change that. This is a local protocol/recovery test, not independent cloud backup
+durability. Keep Compose and Kubernetes separate on the 16 GB laptop. See the
+[database recovery lesson](docs/lessons/PHASE_1_DATABASE_BACKUPS.md).

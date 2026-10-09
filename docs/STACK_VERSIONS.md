@@ -54,6 +54,16 @@ for chart checks; no runtime application package versions changed.
 
 ## Database image compatibility
 
+Installed and exercised on Kubernetes 1.36.5 on 9 October 2026: CloudNativePG
+1.30.1 (chart 0.29.1), Barman Cloud 0.15.1 (chart 0.8.1), and cert-manager 1.21.2.
+Archive checksums and operator/sidecar image digests are recorded in
+`infra/k8s/local/operators.json`. The local installer verifies them and uses
+small resource limits; it does not use a moving upstream installation URL.
+The tested PostgreSQL image runs as UID/GID 999 under CloudNativePG, with its
+extensions and server settings declared in the Cluster rather than relying on
+the image's Compose command. See the database recovery lesson for its actual
+verification and local-emulator durability boundary.
+
 Use PostgreSQL 18.6 consistently in local development, integration tests and CloudNativePG. The [CloudNativePG image documentation](https://cloudnative-pg.io/docs/1.30/container_images/) and [image repository](https://github.com/cloudnative-pg/postgres-containers) do not establish that an arbitrary stock image has `pg_partman` and `pg_cron` installed. The Phase 0 database image must explicitly provide those extensions, and integration tests must query `pg_available_extensions`, create them and exercise partition maintenance. Do not silently remove the planned partitioning or retention scope to accommodate an image.
 
 ## Verification boundary

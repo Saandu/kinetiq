@@ -1,0 +1,99 @@
+# Local emulation only: no AWS resources, no Docker socket, no host ports.
+# This PVC caches activation data. Hobby S3 state remains ephemeral, independently
+# of its presence. Run the restore drill while LocalStack is running.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: kinetiq-localstack-data, namespace: kinetiq-local}
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources: {requests: {storage: 2Gi}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata: {name: kinetiq-localstack-init, namespace: kinetiq-local}
+data:
+  10-backups.sh: |
+    #!/bin/sh
+    set -eu
+    awslocal s3api head-bucket --bucket kinetiq-backups 2>/dev/null || awslocal s3api create-bucket --bucket kinetiq-backups
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: localstack, namespace: kinetiq-local}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app.kubernetes.io/instance: kinetiq, app.kubernetes.io/component: localstack}
+  template:
+    metadata:
+      labels: {app.kubernetes.io/instance: kinetiq, app.kubernetes.io/component: localstack}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: localstack
+          image: localstack/localstack:2026.09.0@sha256:801a3dff7f6a23857e7310b7602e67d52a29dfdcb03e09f7c608d5c57d24b792
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: {drop: [ALL]}
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits: {cpu: '2', memory: 1Gi}
+          env:
+            - {name: SERVICES, value: 'sqs,s3'}
+            - {name: SQS_ENDPOINT_STRATEGY, value: dynamic}
+            - name: LOCALSTACK_AUTH_TOKEN
+              valueFrom: {secretKeyRef: {name: kinetiq-localstack-auth, key: token}}
+          ports: [{name: aws, containerPort: 4566}]
+          startupProbe:
+            httpGet: {path: /_localstack/health, port: aws}
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            exec: {command: [sh, -c, 'awslocal s3api head-bucket --bucket kinetiq-backups']}
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet: {path: /_localstack/health, port: aws}
+            periodSeconds: 10
+          volumeMounts:
+            - {name: data, mountPath: /var/lib/localstack}
+            - {name: init, mountPath: /etc/localstack/init/ready.d, readOnly: true}
+      volumes:
+        - name: data
+          persistentVolumeClaim: {claimName: kinetiq-localstack-data}
+        - name: init
+          configMap: {name: kinetiq-localstack-init, defaultMode: 365}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: localstack, namespace: kinetiq-local}
+spec:
+  selector: {app.kubernetes.io/instance: kinetiq, app.kubernetes.io/component: localstack}
+  ports: [{name: aws, port: 4566, targetPort: aws}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: localstack-ingress, namespace: kinetiq-local}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/instance: kinetiq, app.kubernetes.io/component: localstack}
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - podSelector: {matchLabels: {cnpg.io/cluster: kinetiq-db}}
+        - podSelector: {matchLabels: {cnpg.io/cluster: kinetiq-db-restore}}
+        - podSelector: {matchLabels: {app.kubernetes.io/component: ingest}}
+        - podSelector: {matchLabels: {app.kubernetes.io/component: local-bridge}}
+        - podSelector: {matchLabels: {app.kubernetes.io/component: queues}}
+      ports: [{protocol: TCP, port: 4566}]
+  # Emulator activation needs outbound HTTPS; application Pods do not receive this permission.
+  egress:
+    - to:
+        - namespaceSelector: {matchLabels: {kubernetes.io/metadata.name: kube-system}}
+          podSelector: {matchLabels: {k8s-app: kube-dns}}
+      ports: [{protocol: UDP, port: 53}, {protocol: TCP, port: 53}]
+    - ports: [{protocol: TCP, port: 443}]

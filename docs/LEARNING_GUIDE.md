@@ -341,7 +341,7 @@ Two traps (we'll write tests for both):
 - **Point-in-time recovery (PITR).** Base backup + the WAL files after it = you can rebuild the database as it was at any moment, e.g. "10:42, just before someone ran a bad migration". That's a skill companies value, and few portfolio projects demonstrate it.
 - **RPO (recovery point objective)**: how much data you could lose in the worst case. Ours is at most 5 minutes of writes (the archive interval), and telemetry from that window is usually still in SQS.
 - **RTO (recovery time objective)**: how long recovery takes. We'll measure it in the recovery drill.
-- **Separate data disk.** The database files live on their own disk (a **volume**), not on the server's main disk. When the server is replaced, the new one reattaches that disk and Postgres continues. If the disk itself were lost, we restore from S3. We'll prove the reattach path works in Phase 1 before relying on it.
+- **Separate data disk.** The planned cloud database files live on their own **volume**. Reattaching it to a replacement server is an optimisation that needs a separate spike; k3s local-path storage does not establish that behavior. Restoring from independent S3 storage is the primary recovery path. Phase 1 tests a fresh-volume S3 restore and retained-volume Pod replacement separately.
 - **Restore tests.** Once a month a job restores the latest backup into a temporary database and checks it. A backup nobody has ever restored is a hope, not a backup.
 
 **Limitations.** One Postgres instance on one server: if it's down, the app is down (readings wait in SQS). No replica to fail over to. Postgres shares 4 GB of memory with everything else, so it's tuned small; fine for 12 devices, and the load test will show where it stops. **Production answer:** CloudNativePG with 2-3 replicas on separate nodes (it handles automatic failover), or RDS Multi-AZ. Documented in the README.
@@ -934,3 +934,7 @@ installation, cluster credentials, image imports, memory limits and restart prac
 
 Then read [Phase 1: Helm](lessons/PHASE_1_HELM.md) for Deployments, Services,
 Secret references, probes, update strategies, Jobs, NetworkPolicies and resource budgets.
+
+Then read [Phase 1: database backups and recovery](lessons/PHASE_1_DATABASE_BACKUPS.md)
+for CloudNativePG, certificate validation, WAL, fresh-volume restoration,
+retained-volume recovery and the measured LocalStack persistence limitation.

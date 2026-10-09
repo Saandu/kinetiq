@@ -39,7 +39,10 @@
     "k8s:images:verify": "node scripts/k8s-cluster.mjs images-verify",
     "k8s:kubectl": "node scripts/k8s-cluster.mjs kubectl",
     "helm:verify": "node scripts/verify-helm.mjs",
-    "helm:smoke": "npm run helm:verify && node scripts/smoke-helm-web.mjs"
+    "helm:smoke": "npm run helm:verify && node scripts/smoke-helm-web.mjs",
+    "k8s:operators": "node scripts/setup-k8s-operators.mjs",
+    "k8s:database": "node scripts/setup-k8s-database.mjs",
+    "k8s:database:verify": "node scripts/verify-k8s-database.mjs"
   },
   "devDependencies": {
     "@types/node": "24.19.1",

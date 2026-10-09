@@ -115,3 +115,48 @@ tests and six transport tests, lint/build/type checks, the PostgreSQL image,
 all four Node image import/non-root checks, Compose acceptance and the production
 dependency audit (zero reported vulnerabilities). New JavaScript scripts passed
 ESLint and syntax checks. No chart was installed and no cloud changes were made.
+
+The CloudNativePG database checkpoint is implemented on 9 October 2026.
+Checksum-verified CloudNativePG 1.30.1/chart 0.29.1, Barman Cloud 0.15.1/chart
+0.8.1 and cert-manager 1.21.2 ran on the pinned local Kubernetes version.
+Operator and sidecar images are pinned by digest. Re-running operator/database
+setup preserved credentials and the source PVC. The existing PostgreSQL image
+initialized successfully as UID/GID 999 with both extensions and explicit
+Cluster settings, including a 50-connection cap.
+
+The final drill verified certificate/hostname-checked TLS, plaintext rejection,
+migrations, repeatable seed, duplicate ingestion, tenant isolation, pooled
+context cleanup, restricted roles, scheduled maintenance and partition routing.
+Four fixture readings and twelve seeded machines were checked before and after
+an S3 restore onto a different persistent volume. Replacing the source Pod also
+preserved those readings on the same source PVC. The final base backup took
+18.9 seconds and fresh-volume restore/read checks took 85.2 seconds; these are
+tiny local fixture measurements, not production RPO/RTO or scaling results.
+An observed node-memory sample during an earlier restore was 2.49 GiB, plus
+about 16 MiB for the proxy; the full application was not running in Kubernetes.
+
+An additional emulator-restart experiment failed its durability assertion:
+Hobby LocalStack lost S3 objects despite a PVC and `PERSISTENCE=1`. Upstream
+documents persistence under paid plans. The ineffective flag was removed;
+the final recovery drill explicitly tests PostgreSQL recovery through live
+emulated S3, not emulator/host durability. A restarted emulator needs a new
+backup, and old `completed` Backup objects do not prove the files still exist.
+Independent cloud S3 and replacement-server recovery remain Phase 2 work.
+No paid upgrade, cloud resources or global RAM allocation changes were made.
+
+The manual restore drill and daily backup schedule exist. Monthly cloud restore
+scheduling and alarms are still outstanding. Retained-volume Pod replacement
+does not establish the fresh-node volume reattach spike. The next step wires
+MQTT, LocalStack queues and the application chart, then demonstrates KEDA under
+bounded load. See [the database recovery lesson](lessons/PHASE_1_DATABASE_BACKUPS.md).
+
+Checkpoint gates also passed: lint, every workspace build and type check,
+125 package tests (web 47, contracts 31, database 24, runtime 3, API 11,
+ingest 6, simulator 3), six transport tests, the PostgreSQL image build,
+all four Node production image/non-root/import checks, both strict Helm profiles
+and seventeen regression checks, rendered Nginx smoke, new-script syntax/ESLint
+and a production dependency audit with zero reported vulnerabilities. Kubernetes
+was stopped afterward; Compose was restarted and accepted fresh readings from
+all twelve devices with API values matching persisted database metrics. The
+dashboard is available on port 3101. Python/CDK checks remain inapplicable until
+those packages exist; cloud CI installation is still the later GitOps step.
