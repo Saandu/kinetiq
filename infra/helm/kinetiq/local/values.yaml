@@ -1,0 +1,2 @@
+# Local development: a single API replica saves laptop RAM.
+environment: local

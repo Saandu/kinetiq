@@ -1,0 +1,61 @@
+environment: local
+imagePullPolicy: Never
+siteId: 11111111-1111-4111-8111-111111111112
+organizationId: 11111111-1111-4111-8111-111111111111
+database:
+  clusterName: kinetiq-db
+  service: kinetiq-db-rw
+secrets:
+  admin: kinetiq-db-admin
+  api: kinetiq-db-api
+  ingest: kinetiq-db-ingest
+  mqttDevice: kinetiq-mqtt-device
+  mqttBridge: kinetiq-mqtt-bridge
+queue:
+  url: http://localstack:4566/queue/us-east-1/000000000000/kinetiq-telemetry
+ingress:
+  enabled: true
+  className: traefik
+  host: kinetiq.localhost
+budgetMi: 2560
+components:
+  api:
+    image: kinetiq-api:local
+    replicas: 1
+    uid: 1000
+    resources:
+      requests: {cpu: 50m, memory: 64Mi}
+      limits: {cpu: 500m, memory: 256Mi}
+  ingest:
+    image: kinetiq-ingest:local
+    replicas: 1
+    uid: 1000
+    resources:
+      requests: {cpu: 50m, memory: 64Mi}
+      limits: {cpu: 500m, memory: 192Mi}
+  local-bridge:
+    image: kinetiq-local-bridge:local
+    replicas: 1
+    uid: 1000
+    resources:
+      requests: {cpu: 25m, memory: 32Mi}
+      limits: {cpu: 250m, memory: 128Mi}
+  simulator:
+    image: kinetiq-simulator:local
+    replicas: 1
+    uid: 1000
+    resources:
+      requests: {cpu: 25m, memory: 32Mi}
+      limits: {cpu: 250m, memory: 128Mi}
+  web:
+    image: kinetiq-web:local
+    replicas: 1
+    uid: 101
+    resources:
+      requests: {cpu: 25m, memory: 32Mi}
+      limits: {cpu: 250m, memory: 128Mi}
+jobs:
+  enabled: true
+  resources:
+    requests: {cpu: 50m, memory: 64Mi}
+    limits: {cpu: 500m, memory: 256Mi}

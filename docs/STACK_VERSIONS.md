@@ -14,6 +14,7 @@ Node follows LTS. PostgreSQL follows supported stable majors. Python and most pl
 | kubectl | 1.36.5, matches the local server minor | [Official binaries](https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/) |
 | k3d | 5.9.0 | [Release](https://github.com/k3d-io/k3d/releases/tag/v5.9.0) |
 | Helm | 4.3.0 | [Release](https://github.com/helm/helm/releases/tag/v4.3.0) |
+| kubeconform | 0.8.0 | [Release](https://github.com/yannh/kubeconform/releases/tag/v0.8.0) |
 | Argo CD | 3.5.3 | [Release](https://github.com/argoproj/argo-cd/releases/tag/v3.5.3) |
 | KEDA | 2.21.0 | [Release](https://github.com/kedacore/keda/releases/tag/v2.21.0) |
 | External Secrets chart | 2.11.0 | [Release](https://github.com/external-secrets/external-secrets/releases/tag/helm-chart-2.11.0) |
@@ -43,6 +44,13 @@ The newer k3s 1.37.1 is therefore not the local baseline. Other operators must
 still pass their own chart compatibility and installation checks when introduced.
 Windows x64 tool artifacts and their SHA-256 hashes are pinned in
 `infra/k8s/local/tools.json`. The k3s image is pinned in the local cluster YAML.
+
+The chart checkpoint adds kubeconform 0.8.0 with a checked Windows archive digest.
+Strict Kubernetes 1.36.5 schemas use registry commit
+`5f1fa4f7908afc9b6641c62d282a4a22437626e1` in `scripts/verify-helm.mjs`, not a
+moving branch. The schema cache stays under ignored `.tools/k8s` on D:.
+The existing locked `yaml` 2.9.1 parser is now an explicit development dependency
+for chart checks; no runtime application package versions changed.
 
 ## Database image compatibility
 

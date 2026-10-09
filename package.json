@@ -37,16 +37,19 @@
     "k8s:verify": "node scripts/k8s-cluster.mjs verify",
     "k8s:images": "node scripts/k8s-cluster.mjs images",
     "k8s:images:verify": "node scripts/k8s-cluster.mjs images-verify",
-    "k8s:kubectl": "node scripts/k8s-cluster.mjs kubectl"
+    "k8s:kubectl": "node scripts/k8s-cluster.mjs kubectl",
+    "helm:verify": "node scripts/verify-helm.mjs",
+    "helm:smoke": "npm run helm:verify && node scripts/smoke-helm-web.mjs"
   },
   "devDependencies": {
     "@types/node": "24.19.1",
+    "@typescript/native": "npm:typescript@7.0.2",
     "eslint": "10.12.0",
-    "typescript-eslint": "8.71.0",
     "eslint-plugin-vue": "10.11.1",
     "globals": "17.13.0",
-    "@typescript/native": "npm:typescript@7.0.2",
-    "typescript": "npm:@typescript/typescript6@6.0.2"
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "typescript-eslint": "8.71.0",
+    "yaml": "2.9.1"
   },
   "overrides": {
     "@esbuild-kit/core-utils": {

@@ -272,3 +272,16 @@ memory cap; API and future ingress ports bind to loopback. `npm run k8s:stop`
 preserves the cluster; `npm run k8s:up` starts it again. Application deployment,
 operators and backup restoration are subsequent Phase 1 steps. The dashboard
 currently runs through Compose. See the [cluster lesson](docs/lessons/PHASE_1_CLUSTER.md).
+
+The application chart can now be checked without starting Kubernetes:
+
+```sh
+npm run helm:verify
+npm run helm:smoke
+```
+
+Both local and CI profiles undergo strict schema, security, network-rule and
+memory-budget checks. The smoke command also checks Nginx configuration in the
+real web image. The chart requires database/platform provisioning before it can
+run the full pipeline; rendered objects do not establish runtime readiness or
+policy enforcement. See the [Helm lesson](docs/lessons/PHASE_1_HELM.md).

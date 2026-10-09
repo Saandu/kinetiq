@@ -931,3 +931,6 @@ validation, pooled tenant isolation, missing analytics and the real acceptance c
 
 Continue with [Phase 1: local Kubernetes](lessons/PHASE_1_CLUSTER.md) for tool
 installation, cluster credentials, image imports, memory limits and restart practice.
+
+Then read [Phase 1: Helm](lessons/PHASE_1_HELM.md) for Deployments, Services,
+Secret references, probes, update strategies, Jobs, NetworkPolicies and resource budgets.

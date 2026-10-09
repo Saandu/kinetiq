@@ -76,7 +76,9 @@ remained absent; API and future ingress bindings are loopback-only.
 
 Observed server memory was 623–810 MiB, plus about 16 MiB for the k3d proxy.
 The configured node cap is 8 GiB, but this Docker WSL VM currently provides only
-6.7 GiB total. Increase that allocation before running the full stack. These are
+6.7 GiB total. On this 16 GB laptop, keep the allocation and run Compose and
+Kubernetes separately; use measured full-stack results to choose a dedicated
+verification session, CI or another machine if necessary. These are
 foundation observations, not a full-stack memory or availability result.
 Application Helm objects and operators are the next steps. No cloud resources
 have been created. See [the cluster lesson](lessons/PHASE_1_CLUSTER.md).
@@ -84,5 +86,32 @@ have been created. See [the cluster lesson](lessons/PHASE_1_CLUSTER.md).
 This checkpoint also passed the database image build, lint, all workspace builds
 and type checks, 125 package tests, six transport tests and Compose acceptance.
 All four Node images passed production import and non-root identity checks.
-Helm can query the local cluster's existing system releases; application chart
-lint/render checks start when the chart exists in the next step.
+At the foundation checkpoint, Helm could query the local system releases.
+Application chart checks are implemented in the checkpoint below.
+
+The application chart is now implemented under `infra/helm/kinetiq`, with local
+and CI profiles, five Deployments, two setup Jobs, existing Secret references,
+Services, configuration, ingress and eleven NetworkPolicies. Both profiles render
+36 objects and pass strict Kubernetes 1.36.5 schemas with no skipped resources.
+Seventeen unsafe-change regression checks cover credential exposure, public ports,
+security, policies, values and memory. The real non-root web image accepts the
+rendered Nginx configuration, including Kubernetes DNS discovery.
+
+Steady application memory limits are 832 MiB locally and 1,088 MiB in the CI
+profile. Including simultaneous rolling surges and both setup Jobs, the totals
+are 1,920 and 2,176 MiB. These are configured budgets, excluding the database,
+emulators, operators and Kubernetes. No full-stack memory measurement or network
+policy enforcement result is claimed. The simulator and bridge use Recreate
+updates to avoid overlapping fixed MQTT client IDs. Kubernetes remains stopped
+during this chart checkpoint's Compose-based checks.
+
+The chart deliberately requires the subsequent CloudNativePG/platform steps
+before installation. Database/queue Jobs have not yet run under Kubernetes;
+Argo CD sync ordering and Linux CI installation belong to their later steps.
+See [the Helm lesson](lessons/PHASE_1_HELM.md).
+
+Chart checkpoint verification on 9 October 2026 also passed all 125 package
+tests and six transport tests, lint/build/type checks, the PostgreSQL image,
+all four Node image import/non-root checks, Compose acceptance and the production
+dependency audit (zero reported vulnerabilities). New JavaScript scripts passed
+ESLint and syntax checks. No chart was installed and no cloud changes were made.

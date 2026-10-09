@@ -1,0 +1,345 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "environment",
+    "imagePullPolicy",
+    "siteId",
+    "organizationId",
+    "database",
+    "secrets",
+    "queue",
+    "ingress",
+    "budgetMi",
+    "components",
+    "jobs"
+  ],
+  "properties": {
+    "environment": {
+      "enum": [
+        "local",
+        "ci"
+      ]
+    },
+    "imagePullPolicy": {
+      "enum": [
+        "Never",
+        "IfNotPresent"
+      ]
+    },
+    "siteId": {
+      "const": "11111111-1111-4111-8111-111111111112"
+    },
+    "organizationId": {
+      "const": "11111111-1111-4111-8111-111111111111"
+    },
+    "database": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "clusterName",
+        "service"
+      ],
+      "properties": {
+        "clusterName": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,39}$"
+        },
+        "service": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,49}$"
+        }
+      }
+    },
+    "secrets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "admin",
+        "api",
+        "ingest",
+        "mqttDevice",
+        "mqttBridge"
+      ],
+      "properties": {
+        "admin": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,62}$"
+        },
+        "api": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,62}$"
+        },
+        "ingest": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,62}$"
+        },
+        "mqttDevice": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,62}$"
+        },
+        "mqttBridge": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,62}$"
+        }
+      }
+    },
+    "queue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "url": {
+          "const": "http://localstack:4566/queue/us-east-1/000000000000/kinetiq-telemetry"
+        }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "className",
+        "host"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "className": {
+          "const": "traefik"
+        },
+        "host": {
+          "const": "kinetiq.localhost"
+        }
+      }
+    },
+    "budgetMi": {
+      "type": "integer",
+      "minimum": 1024,
+      "maximum": 3072
+    },
+    "components": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "api",
+        "ingest",
+        "local-bridge",
+        "simulator",
+        "web"
+      ],
+      "properties": {
+        "api": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "image",
+            "replicas",
+            "uid",
+            "resources"
+          ],
+          "properties": {
+            "image": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9./_-]+(:[a-zA-Z0-9._-]+|@sha256:[a-f0-9]{64})$",
+              "not": {
+                "pattern": ":latest$"
+              }
+            },
+            "replicas": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3
+            },
+            "uid": {
+              "const": 1000
+            },
+            "resources": {
+              "$ref": "#/definitions/resources"
+            }
+          }
+        },
+        "ingest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "image",
+            "replicas",
+            "uid",
+            "resources"
+          ],
+          "properties": {
+            "image": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9./_-]+(:[a-zA-Z0-9._-]+|@sha256:[a-f0-9]{64})$",
+              "not": {
+                "pattern": ":latest$"
+              }
+            },
+            "replicas": {
+              "const": 1
+            },
+            "uid": {
+              "const": 1000
+            },
+            "resources": {
+              "$ref": "#/definitions/resources"
+            }
+          }
+        },
+        "local-bridge": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "image",
+            "replicas",
+            "uid",
+            "resources"
+          ],
+          "properties": {
+            "image": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9./_-]+(:[a-zA-Z0-9._-]+|@sha256:[a-f0-9]{64})$",
+              "not": {
+                "pattern": ":latest$"
+              }
+            },
+            "replicas": {
+              "const": 1
+            },
+            "uid": {
+              "const": 1000
+            },
+            "resources": {
+              "$ref": "#/definitions/resources"
+            }
+          }
+        },
+        "simulator": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "image",
+            "replicas",
+            "uid",
+            "resources"
+          ],
+          "properties": {
+            "image": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9./_-]+(:[a-zA-Z0-9._-]+|@sha256:[a-f0-9]{64})$",
+              "not": {
+                "pattern": ":latest$"
+              }
+            },
+            "replicas": {
+              "const": 1
+            },
+            "uid": {
+              "const": 1000
+            },
+            "resources": {
+              "$ref": "#/definitions/resources"
+            }
+          }
+        },
+        "web": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "image",
+            "replicas",
+            "uid",
+            "resources"
+          ],
+          "properties": {
+            "image": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9./_-]+(:[a-zA-Z0-9._-]+|@sha256:[a-f0-9]{64})$",
+              "not": {
+                "pattern": ":latest$"
+              }
+            },
+            "replicas": {
+              "const": 1
+            },
+            "uid": {
+              "const": 101
+            },
+            "resources": {
+              "$ref": "#/definitions/resources"
+            }
+          }
+        }
+      }
+    },
+    "jobs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "resources"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "resources": {
+          "$ref": "#/definitions/resources"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requests",
+        "limits"
+      ],
+      "properties": {
+        "requests": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cpu",
+            "memory"
+          ],
+          "properties": {
+            "cpu": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*m$"
+            },
+            "memory": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*Mi$"
+            }
+          }
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cpu",
+            "memory"
+          ],
+          "properties": {
+            "cpu": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*m$"
+            },
+            "memory": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*Mi$"
+            }
+          }
+        }
+      }
+    }
+  }
+}

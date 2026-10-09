@@ -49,3 +49,13 @@ stored readings must remain available. Do not remove volumes during this check.
 
 The committed CI gate runs the same local acceptance script on trusted main pushes.
 Local checks do not imply the unpushed workflow has succeeded on GitHub.
+
+## Helm chart checks
+
+After `npm run k8s:tools`, run `npm run helm:verify` and `npm run helm:smoke`.
+These checks do not require a running cluster. They lint/render the local and CI
+values, validate strict pinned Kubernetes 1.36.5 schemas without skipping missing
+schemas, enforce application security/network/memory constraints, reject unsafe
+changes and check the mounted Nginx configuration in its actual image.
+Chart installation, setup Job execution, NetworkPolicy enforcement and the
+CloudNativePG restore drill remain later Phase 1 runtime gates.

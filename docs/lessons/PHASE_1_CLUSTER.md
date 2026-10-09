@@ -69,9 +69,13 @@ ceiling, with space for Kubernetes itself. This cap does not prove the complete
 production stack fits, and a single node does not provide high availability.
 
 On this PC, Docker currently reports only 6.7 GiB total VM memory. That is the
-effective ceiling even with an 8 GiB container cap. Increase the WSL/Docker memory
-allocation before deploying the complete stack; the empty foundation does not
-require that change. This affects RAM allocation, not the disk location on D:.
+effective ceiling even with an 8 GiB container cap. Keep that allocation on this
+16 GB laptop while other programs run. Use Compose and Kubernetes separately;
+measure the full stack before deciding whether its verification needs a dedicated
+session, CI or another machine. RAM allocation does not move the disk from D:.
+
+The Helm step adds checksum-verified kubeconform 0.8.0 to the same tool directory
+for strict schema validation. Continue with the [Helm lesson](PHASE_1_HELM.md).
 
 ## Commands to use
 

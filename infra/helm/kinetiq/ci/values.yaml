@@ -1,0 +1,5 @@
+# Exercise multi-replica API selectors and rolling-update budgeting in CI renders.
+environment: ci
+components:
+  api:
+    replicas: 2

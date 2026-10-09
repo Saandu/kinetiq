@@ -1,0 +1,97 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-default-deny
+  labels:
+    {{- include "kinetiq.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/instance: {{ .Release.Name }}}
+  policyTypes: [Ingress, Egress]
+  ingress: []
+  egress: []
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-dns
+  labels:
+    {{- include "kinetiq.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/instance: {{ .Release.Name }}}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels: {kubernetes.io/metadata.name: kube-system}
+          podSelector:
+            matchLabels: {k8s-app: kube-dns}
+      ports:
+        - {protocol: UDP, port: 53}
+        - {protocol: TCP, port: 53}
+{{- range $name := list "api" "web" }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $.Release.Name }}-{{ $name }}-ingress
+  labels:
+    {{- include "kinetiq.labels" $ | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ $.Release.Name }}
+      app.kubernetes.io/component: {{ $name }}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        {{- if eq $name "web" }}
+        - namespaceSelector:
+            matchLabels: {kubernetes.io/metadata.name: kube-system}
+          podSelector:
+            matchLabels: {app.kubernetes.io/name: traefik}
+        {{- else }}
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: {{ $.Release.Name }}
+              app.kubernetes.io/component: web
+        {{- end }}
+      ports: [{protocol: TCP, port: 8080}]
+{{- end }}
+{{- $routes := dict
+  "web" (list (dict "target" "api" "port" 8080))
+  "api" (list (dict "target" "postgres" "port" 5432))
+  "ingest" (list (dict "target" "postgres" "port" 5432) (dict "target" "localstack" "port" 4566))
+  "local-bridge" (list (dict "target" "mosquitto" "port" 1883) (dict "target" "localstack" "port" 4566))
+  "simulator" (list (dict "target" "mosquitto" "port" 1883))
+  "migrations" (list (dict "target" "postgres" "port" 5432))
+  "queues" (list (dict "target" "localstack" "port" 4566)) }}
+{{- range $source, $destinations := $routes }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $.Release.Name }}-{{ $source }}-egress
+  labels:
+    {{- include "kinetiq.labels" $ | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ $.Release.Name }}
+      app.kubernetes.io/component: {{ $source }}
+  policyTypes: [Egress]
+  egress:
+    {{- range $destination := $destinations }}
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- if eq $destination.target "postgres" }}
+              cnpg.io/cluster: {{ $.Values.database.clusterName }}
+              {{- else }}
+              app.kubernetes.io/instance: {{ $.Release.Name }}
+              app.kubernetes.io/component: {{ $destination.target }}
+              {{- end }}
+      ports: [{protocol: TCP, port: {{ $destination.port }}}]
+    {{- end }}
+{{- end }}

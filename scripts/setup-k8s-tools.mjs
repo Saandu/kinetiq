@@ -44,10 +44,12 @@ export async function install() {
       await rename(`${archive}.partial`, archive);
     }
     if (hash(bytes) !== pin.sha256) throw new Error(`${name} SHA-256 mismatch`);
-    if (name === 'helm') {
-      await mkdir(path.join(toolDirectory, 'helm-extracted'), { recursive: true });
-      run('tar.exe', ['-xf', archive, '-C', path.join(toolDirectory, 'helm-extracted'), 'windows-amd64/helm.exe']);
-      await copyFile(path.join(toolDirectory, 'helm-extracted/windows-amd64/helm.exe'), tool(name));
+    if (name === 'helm' || name === 'kubeconform') {
+      const extracted = path.join(toolDirectory, `${name}-extracted`);
+      const entry = name === 'helm' ? 'windows-amd64/helm.exe' : 'kubeconform.exe';
+      await mkdir(extracted, { recursive: true });
+      run('tar.exe', ['-xf', archive, '-C', extracted, entry]);
+      await copyFile(path.join(extracted, entry), tool(name));
     } else {
       await writeFile(tool(name), bytes);
     }
@@ -59,6 +61,7 @@ export function verifyTools() {
   for (const [name, args] of [
     ['k3d', ['version']], ['kubectl', ['version', '--client', '-o', 'json']],
     ['helm', ['version', '--short']],
+    ['kubeconform', ['-v']],
   ]) {
     const output = run(tool(name), args, { stdio: 'pipe' });
     if (!output.includes(`v${pins[name].version}`)) throw new Error(`Unexpected ${name} version`);

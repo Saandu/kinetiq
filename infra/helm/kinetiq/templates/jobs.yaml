@@ -1,0 +1,73 @@
+{{- if .Values.jobs.enabled }}
+{{- range $name := list "migrations" "queues" }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $.Release.Name }}-{{ $name }}
+  labels:
+    {{- include "kinetiq.labels" $ | nindent 4 }}
+automountServiceAccountToken: false
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $.Release.Name }}-{{ $name }}-{{ $.Release.Revision }}
+  labels:
+    {{- include "kinetiq.labels" $ | nindent 4 }}
+spec:
+  backoffLimit: 6
+  activeDeadlineSeconds: 600
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kinetiq
+        app.kubernetes.io/instance: {{ $.Release.Name }}
+        app.kubernetes.io/component: {{ $name }}
+    spec:
+      serviceAccountName: {{ $.Release.Name }}-{{ $name }}
+      automountServiceAccountToken: false
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: {{ $name }}
+          image: {{ $.Values.components.api.image | quote }}
+          imagePullPolicy: {{ $.Values.imagePullPolicy }}
+          command: [node, /app/infra/k8s/{{ $name }}.mjs]
+          securityContext:
+            {{- include "kinetiq.security" $ | nindent 12 }}
+          resources:
+            {{- toYaml $.Values.jobs.resources | nindent 12 }}
+          env:
+            {{- if eq $name "migrations" }}
+            - {name: DATABASE_URL_FILE, value: /secrets/admin/database-url}
+            {{- else }}
+            - {name: SQS_QUEUE_URL, value: {{ $.Values.queue.url | quote }}}
+            {{- end }}
+          volumeMounts:
+            - {name: setup, mountPath: /app/infra/k8s, readOnly: true}
+            - {name: tmp, mountPath: /tmp}
+            {{- if eq $name "migrations" }}
+            {{- range $area := list "admin" "api" "ingest" }}
+            - {name: {{ $area }}, mountPath: /secrets/{{ $area }}, readOnly: true}
+            {{- end }}
+            {{- end }}
+      volumes:
+        - name: setup
+          configMap: {name: {{ $.Release.Name }}-setup}
+        - name: tmp
+          emptyDir: {sizeLimit: 64Mi}
+        {{- if eq $name "migrations" }}
+        {{- range $area := list "admin" "api" "ingest" }}
+        - name: {{ $area }}
+          secret: {secretName: {{ index $.Values.secrets $area }}, defaultMode: 288}
+        {{- end }}
+        {{- end }}
+{{- end }}
+{{- end }}
