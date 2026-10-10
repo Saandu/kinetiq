@@ -105,6 +105,9 @@ jobs:
       - name: Install pinned tools and build all local images
         run: |
           npm run k8s:tools
+          # Host-side broker setup imports the compiled workspace contracts.
+          # Building Docker images does not populate the runner's dist folders.
+          npm run build --workspace @kinetiq/contracts
           npm run db:image
           npm run services:images
           docker build -t kinetiq-web:local -f infra/docker/web/Dockerfile .
