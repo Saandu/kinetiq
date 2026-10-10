@@ -160,3 +160,45 @@ was stopped afterward; Compose was restarted and accepted fresh readings from
 all twelve devices with API values matching persisted database metrics. The
 dashboard is available on port 3101. Python/CDK checks remain inapplicable until
 those packages exist; cloud CI installation is still the later GitOps step.
+
+The running pipeline and bounded scaling checkpoint is implemented on
+10 October 2026. The authenticated non-root broker uses its own PVC and
+device/topic ACLs. Current Helm-revision Jobs apply migrations and recreate
+the emulator queues; all five application Deployments run in the local cluster.
+API, ingest and migrations mount only the public database CA certificate and
+verify database TLS. CloudNativePG's certificate includes the stable postgres
+Service alias. Full-stack acceptance caught and fixed Nginx's short-name DNS
+failure by rendering the API's namespace-qualified service name.
+
+The dashboard now runs at http://127.0.0.1:3102. Acceptance requires new readings
+from every one of the twelve devices during the check, matches API values to
+committed rows and checks encrypted service connections, deep links and rejected
+writes. Runtime Jobs prove MQTT credential/ACL enforcement and denied network
+access from bridge and untrusted Pod identities. The broker was rolled again
+with the same PVC/credentials and accepted fresh pipeline data afterward.
+
+Checksum/digest-pinned KEDA 2.21.0 is installed with the existing cert-manager.
+Local-only endpoints, fake AWS credentials and restricted egress keep scaling
+inside the emulator environment. A bounded 200-message drill observed three
+ready workers, exactly 200 committed fixture rows and a return to one ready
+worker while API reads stayed available during a 70-second device-write lock.
+The test now waits through readiness recovery rather than assuming blocked
+workers immediately become ready. Completed drill fixtures are removed; ordinary
+simulator data remains. Normal demo traffic stays at one worker; this controlled
+experiment is not a throughput or production-capacity benchmark.
+
+Helm now reserves the maximum three-worker limits plus all application rolling
+surges and both setup Jobs: 2,304 MiB locally and 2,560 MiB in CI, excluding the
+platform and Kubernetes. Scaling setup checks this budget and the database
+connection budget. A full-stack node-memory sample during verification was
+2.71 GiB within the existing 6.7 GiB Docker/WSL allocation. This is an observed
+sample, not a worst-case guarantee. Compose remains stopped to save laptop RAM.
+
+Checkpoint gates passed: builds and image import/non-root checks, lint/types,
+127 package tests, six real transport tests, the PostgreSQL image, both strict
+Helm profiles, twenty-one Helm unsafe-change checks, seven local scaling
+unsafe-change checks, Nginx image smoke, script lint and a zero-vulnerability
+production dependency audit. The local cluster is left running for inspection.
+No cloud resources or global memory changes were made. Argo CD and disposable
+Kubernetes CI/restore checks are next; Phase 1 is not yet complete. Read
+[the pipeline and scaling lesson](lessons/PHASE_1_PIPELINE_SCALING.md).

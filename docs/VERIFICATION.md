@@ -57,5 +57,12 @@ These checks do not require a running cluster. They lint/render the local and CI
 values, validate strict pinned Kubernetes 1.36.5 schemas without skipping missing
 schemas, enforce application security/network/memory constraints, reject unsafe
 changes and check the mounted Nginx configuration in its actual image.
-Chart installation, setup Job execution, NetworkPolicy enforcement and the
-CloudNativePG restore drill remain later Phase 1 runtime gates.
+Run `npm run k8s:app:verify` against the configured local cluster to require
+fresh readings from all twelve devices, API/database metric agreement, encrypted
+service connections, deep links and rejected writes. `k8s:boundaries:verify`
+exercises real MQTT authentication/ACL and network denial. `k8s:scaling:config`
+checks local scaling bounds and seven unsafe changes without cluster access;
+`k8s:scaling:verify` runs the bounded 200-message backlog and recovery drill.
+The separate `k8s:database:verify` drill verifies fresh-volume S3 recovery.
+See [the pipeline lesson](lessons/PHASE_1_PIPELINE_SCALING.md) for prerequisites,
+cleanup and the distinction between capacity measurements and this controlled test.

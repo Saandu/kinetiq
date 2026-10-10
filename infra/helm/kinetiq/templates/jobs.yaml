@@ -47,6 +47,7 @@ spec:
           env:
             {{- if eq $name "migrations" }}
             - {name: DATABASE_URL_FILE, value: /secrets/admin/database-url}
+            - {name: DATABASE_CA_FILE, value: /secrets/ca/ca.crt}
             {{- else }}
             - {name: SQS_QUEUE_URL, value: {{ $.Values.queue.url | quote }}}
             {{- end }}
@@ -54,6 +55,7 @@ spec:
             - {name: setup, mountPath: /app/infra/k8s, readOnly: true}
             - {name: tmp, mountPath: /tmp}
             {{- if eq $name "migrations" }}
+            - {name: database-ca, mountPath: /secrets/ca, readOnly: true}
             {{- range $area := list "admin" "api" "ingest" }}
             - {name: {{ $area }}, mountPath: /secrets/{{ $area }}, readOnly: true}
             {{- end }}
@@ -64,6 +66,11 @@ spec:
         - name: tmp
           emptyDir: {sizeLimit: 64Mi}
         {{- if eq $name "migrations" }}
+        - name: database-ca
+          secret:
+            secretName: {{ $.Values.database.clusterName }}-ca
+            defaultMode: 288
+            items: [{key: ca.crt, path: ca.crt}]
         {{- range $area := list "admin" "api" "ingest" }}
         - name: {{ $area }}
           secret: {secretName: {{ index $.Values.secrets $area }}, defaultMode: 288}

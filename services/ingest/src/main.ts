@@ -1,8 +1,9 @@
 import { createServicePool, insertTelemetryBatch, InvalidDeviceMapping, resolveDevice } from '@kinetiq/db'
-import { createLocalQueueClient, requiredEnv, serveHealth, stopSignal } from '@kinetiq/runtime'
+import { createLocalQueueClient, databaseTls, requiredEnv, serveHealth, stopSignal } from '@kinetiq/runtime'
 import { runConsumer } from './index.js'
 
-const pool = createServicePool('ingest', { connectionString: requiredEnv('DATABASE_URL') })
+const connectionString = requiredEnv('DATABASE_URL')
+const pool = createServicePool('ingest', { connectionString, ssl: databaseTls(connectionString) })
 await pool.query('SELECT 1')
 const queue = createLocalQueueClient(requiredEnv('SQS_ENDPOINT'))
 const stop = stopSignal()

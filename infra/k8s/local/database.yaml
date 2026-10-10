@@ -11,6 +11,8 @@ spec:
   postgresGID: 999
   enableSuperuserAccess: true
   superuserSecret: {name: kinetiq-db-admin}
+  certificates:
+    serverAltDNSNames: [postgres, postgres.kinetiq-local, postgres.kinetiq-local.svc, postgres.kinetiq-local.svc.cluster.local]
   bootstrap:
     initdb:
       database: kinetiq

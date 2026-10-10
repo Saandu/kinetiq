@@ -79,3 +79,15 @@ confirmed only when both verification and deployment finish successfully.
 
 Configuration references: [Google authentication action](https://github.com/google-github-actions/auth)
 and [Firebase CLI authentication](https://firebase.google.com/docs/cli#cli-ci-systems).
+
+## Local Kubernetes pipeline
+
+The implemented local Kubernetes dashboard uses http://127.0.0.1:3102.
+After the existing tools, cluster, images and operator prerequisites, run
+`npm run k8s:app`, then `npm run k8s:scaling`. Keep Compose stopped on the
+16 GB laptop. `k8s:app:verify` proves newly persisted readings from all twelve
+devices; the boundary and scaling commands exercise runtime isolation and a
+bounded backlog. This remains a read-only local backend with emulated AWS.
+Public backend hosting and cloud identity are later deployment gates.
+See [the pipeline lesson](lessons/PHASE_1_PIPELINE_SCALING.md) for commands,
+memory/connection budgets, emulator restart behavior and recovery boundaries.

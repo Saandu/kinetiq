@@ -35,6 +35,15 @@ metadata:
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   rules:
+    # This local-only chart is published on loopback; permit numeric localhost too.
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port: {name: http}
     - host: {{ .Values.ingress.host }}
       http:
         paths:

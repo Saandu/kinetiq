@@ -87,6 +87,9 @@ spec:
             failureThreshold: 3
           volumeMounts:
             - {name: tmp, mountPath: /tmp}
+            {{- if has $name (list "api" "ingest") }}
+            - {name: database-ca, mountPath: /secrets/ca, readOnly: true}
+            {{- end }}
             {{- if eq $name "web" }}
             - {name: web-config, mountPath: /config, readOnly: true}
             {{- else }}
@@ -95,6 +98,13 @@ spec:
       volumes:
         - name: tmp
           emptyDir: {sizeLimit: 64Mi}
+        {{- if has $name (list "api" "ingest") }}
+        - name: database-ca
+          secret:
+            secretName: {{ $.Values.database.clusterName }}-ca
+            defaultMode: 288
+            items: [{key: ca.crt, path: ca.crt}]
+        {{- end }}
         {{- if eq $name "web" }}
         - name: web-config
           configMap: {name: {{ $.Release.Name }}-web-server}

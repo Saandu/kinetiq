@@ -73,7 +73,7 @@ function validate(objects, budgetMi) {
         assert.equal(object.spec.strategy.rollingUpdate.maxUnavailable, 0);
         surgeMi += limitMi;
       }
-      steadyMi += limitMi * object.spec.replicas;
+      steadyMi += limitMi * (component === 'ingest' ? 3 : object.spec.replicas);
       for (const probe of ['startupProbe', 'livenessProbe', 'readinessProbe']) assert.ok(container[probe]);
       assert.equal(container.livenessProbe.httpGet.path, component === 'web' ? '/healthz' : '/health/live');
       assert.equal(container.readinessProbe.httpGet.path, component === 'web' ? '/healthz' : '/health/ready');
@@ -89,6 +89,12 @@ function validate(objects, budgetMi) {
     }
   }
   for (const name of names) find('Deployment', `${release}-${name}`);
+  assert.match(find('ConfigMap', `${release}-web-server`).data['default.conf'], /server api\.kinetiq-(?:local|ci)\.svc\.cluster\.local:8080 resolve;/);
+  for (const name of ['api', 'ingest']) {
+    const spec = find('Deployment', `${release}-${name}`).spec.template.spec;
+    assert.deepEqual(spec.volumes.find(volume => volume.name === 'database-ca').secret.items, [{key: 'ca.crt', path: 'ca.crt'}]);
+    assert.equal(find('ConfigMap', `${release}-${name}`).data.DATABASE_CA_FILE, '/secrets/ca/ca.crt');
+  }
   const totalMi = steadyMi + surgeMi + jobMi;
   assert.ok(totalMi <= budgetMi, `Memory budget exceeded: ${totalMi} MiB > ${budgetMi} MiB (includes rolling surges and setup Jobs)`);
   for (const name of ['api', 'web']) {
@@ -143,6 +149,8 @@ for (const profile of ['local', 'ci']) {
     (list) => { list.find((o) => o.kind === 'Deployment').spec.template.spec.containers[0].resources.limits.memory = '4096Mi'; },
     (list) => { list.find((o) => o.kind === 'NetworkPolicy' && o.metadata.name.endsWith('default-deny')).spec.egress = [{}]; },
     (list) => { list.find((o) => o.kind === 'Deployment').spec.template.spec.automountServiceAccountToken = true; },
+    (list) => { list.find((o) => o.kind === 'ConfigMap' && o.metadata.name.endsWith('web-server')).data['default.conf'] = 'server api:8080 resolve;'; },
+    (list) => { list.find((o) => o.kind === 'Deployment' && o.metadata.name.endsWith('-api')).spec.template.spec.volumes.find(volume => volume.name === 'database-ca').secret.items = [{key: 'ca.key', path: 'ca.crt'}]; },
   ]) {
     const unsafe = structuredClone(objects); mutation(unsafe);
     assert.throws(() => validate(unsafe, 2560), 'Unsafe manifest unexpectedly passed');
@@ -157,4 +165,4 @@ const tooSmall = spawnSync(tool('helm'), ['template', release, chart, '--kube-ve
 assert.notEqual(tooSmall.status, 0); assert.match(tooSmall.stderr, /memory budget exceeded/);
 const sharedAdmin = spawnSync(tool('helm'), ['template', release, chart, '--kube-version', '1.36.5', '--set', 'secrets.api=kinetiq-db-admin'], {cwd: root, encoding: 'utf8'});
 assert.notEqual(sharedAdmin.status, 0); assert.match(sharedAdmin.stderr, /Secret references must be distinct/);
-console.log('Both profiles, strict Kubernetes schemas and 17 unsafe-change regression checks passed. No cluster access required.');
+console.log('Both profiles, strict Kubernetes schemas and 21 unsafe-change regression checks passed. Budgets reserve three ingest workers. No cluster access required.');

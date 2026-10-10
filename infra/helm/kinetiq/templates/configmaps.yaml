@@ -11,8 +11,10 @@ data:
   API_MODE: local-readonly
   DEMO_ORGANIZATION_ID: {{ $.Values.organizationId | quote }}
   DATABASE_URL_FILE: /secrets/runtime/credential
+  DATABASE_CA_FILE: /secrets/ca/ca.crt
   {{- else if eq $name "ingest" }}
   DATABASE_URL_FILE: /secrets/runtime/credential
+  DATABASE_CA_FILE: /secrets/ca/ca.crt
   SQS_ENDPOINT: http://localstack:4566
   SQS_QUEUE_URL: {{ $.Values.queue.url | quote }}
   {{- else if eq $name "local-bridge" }}
@@ -55,7 +57,7 @@ data:
       include /tmp/default.conf;
     }
   default.conf: |
-{{ .Files.Get "files/default.conf" | indent 4 }}
+{{ .Files.Get "files/default.conf" | replace "__API__" (printf "api.%s.svc.cluster.local" .Release.Namespace) | indent 4 }}
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -1,7 +1,19 @@
-import { describe, expect, it } from 'vitest'
-import { assertLocalMqttEndpoint, createLocalQueueClient, parseTelemetryTopic, untilStopped } from '../src/index.js'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { databaseTls, assertLocalMqttEndpoint, createLocalQueueClient, parseTelemetryTopic, untilStopped } from '../src/index.js'
 
 describe('local runtime boundaries', () => {
+  afterEach(() => vi.unstubAllEnvs())
+  it('rejects connection parameters that could weaken configured certificate verification', () => {
+    vi.stubEnv('DATABASE_CA_FILE', '/missing-ca.crt')
+    for (const parameter of ['ssl=0', 'sslmode=disable', 'sslmode=no-verify', 'sslrootcert=other', 'sslcert=other', 'sslkey=other']) {
+      expect(() => databaseTls(`postgresql://postgres/kinetiq?${parameter}`)).toThrow('must not override certificate verification')
+    }
+    expect(() => databaseTls('postgresql://postgres/kinetiq')).toThrow()
+  })
+  it('leaves local Compose connections unchanged when no CA is configured', () => {
+    vi.stubEnv('DATABASE_CA_FILE', '')
+    expect(databaseTls('postgresql://postgres/kinetiq')).toBeUndefined()
+  })
   it('accepts the exact transport topic and rejects missing or extra fields', () => {
     const site = '11111111-1111-4111-8111-111111111112'
     expect(parseTelemetryTopic(`kinetiq/${site}/DEMO-CNC-01/telemetry`)).toEqual({ thingName: 'DEMO-CNC-01', machineId: 'DEMO-CNC-01', siteId: site })

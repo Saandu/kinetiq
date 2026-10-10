@@ -1,0 +1,29 @@
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata: {name: kinetiq-sqs-local, namespace: kinetiq-local}
+spec:
+  secretTargetRef:
+    - {parameter: awsAccessKeyID, name: kinetiq-keda-local, key: accessKey}
+    - {parameter: awsSecretAccessKey, name: kinetiq-keda-local, key: secretKey}
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata: {name: kinetiq-ingest, namespace: kinetiq-local}
+spec:
+  scaleTargetRef: {name: kinetiq-ingest}
+  pollingInterval: 5
+  minReplicaCount: 1
+  maxReplicaCount: 3
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleDown: {stabilizationWindowSeconds: 30}
+  triggers:
+    - type: aws-sqs-queue
+      metadata:
+        awsRegion: us-east-1
+        awsEndpoint: http://localstack.kinetiq-local.svc.cluster.local:4566
+        queueURL: http://localstack.kinetiq-local.svc.cluster.local:4566/000000000000/kinetiq-telemetry
+        queueLength: '20'
+        scaleOnInFlight: 'true'
+      authenticationRef: {name: kinetiq-sqs-local}

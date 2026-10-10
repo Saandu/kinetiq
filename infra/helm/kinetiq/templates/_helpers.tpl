@@ -14,7 +14,10 @@ helm.sh/chart: kinetiq-{{ .Chart.Version }}
 {{- range $name, $component := .Values.components -}}
 {{- $surge := 1 -}}
 {{- if has $name (list "simulator" "local-bridge") }}{{ $surge = 0 }}{{ end -}}
-{{- $memory = add $memory (mul (int (trimSuffix "Mi" $component.resources.limits.memory)) (add $component.replicas $surge)) -}}
+{{- $replicas := $component.replicas -}}
+{{- /* Reserve the bounded KEDA maximum, even when only one ingest Pod runs. */ -}}
+{{- if eq $name "ingest" }}{{ $replicas = 3 }}{{ end -}}
+{{- $memory = add $memory (mul (int (trimSuffix "Mi" $component.resources.limits.memory)) (add $replicas $surge)) -}}
 {{- end -}}
 {{- if .Values.jobs.enabled -}}
 {{- $memory = add $memory (mul 2 (int (trimSuffix "Mi" .Values.jobs.resources.limits.memory))) -}}

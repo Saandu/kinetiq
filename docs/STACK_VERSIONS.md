@@ -99,3 +99,13 @@ The generated OpenAPI 3.1 contract is checked during builds. The local web serve
 uses the maintained unprivileged Nginx stable image (verified `nginx/1.30.5`),
 pinned to `sha256:15c994d10d6d78658721c3bcafff14cb281fba2a4bdf9d5ba92c416a472516e3`.
 Its tag is descriptive; the immutable digest controls the actual image.
+
+## Phase 1 running pipeline and scaler
+
+On 10 October 2026 the full local pipeline runs under k3s. KEDA 2.21.0/chart
+2.21.0 is installed from its official chart archive with verified SHA-256;
+operator, metrics server and admission webhook images are pinned by digest in
+`infra/k8s/local/keda.json`. Certificate management uses the existing cert-manager.
+The runtime drill exercises its SQS scaler against the maintained LocalStack
+emulator and caps ingest at three workers. Downloads remain on D: under ignored
+`.tools/k8s/platform`. This does not establish cloud IAM/IRSA behavior.

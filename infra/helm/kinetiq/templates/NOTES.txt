@@ -1,10 +1,11 @@
 Phase 1 application chart. One release per namespace: api, web and postgres
 Service names intentionally preserve the current service image contracts.
 
-Prerequisites (provisioned in subsequent steps):
+Prerequisites (provisioned by npm run k8s:app):
   - CloudNativePG cluster {{ .Values.database.clusterName }} with service {{ .Values.database.service }}
   - localstack:4566 and mosquitto:1883 in this namespace
   - existing Secrets named in values.secrets; never put credentials into Helm values
 
 Wait for both setup Jobs before calling application acceptance successful.
 This chart currently supports local-readonly services, not cloud authentication.
+Run npm run k8s:app:verify, then open http://127.0.0.1:3102 for the local profile.

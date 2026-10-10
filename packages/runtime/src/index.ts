@@ -60,6 +60,16 @@ export function requiredEnv(name: string): string {
   if (!value) throw new Error(`Missing environment variable ${name}`)
   return value
 }
+// Compose stays local-only; Kubernetes opts into verified TLS using its public CA.
+export function databaseTls(connectionString: string): { ca: string; rejectUnauthorized: true } | undefined {
+  const file = process.env.DATABASE_CA_FILE
+  if (!file) return undefined
+  const url = new URL(connectionString)
+  if (['ssl', 'sslmode', 'sslrootcert', 'sslcert', 'sslkey'].some(key => url.searchParams.has(key))) {
+    throw new Error('Database URL must not override certificate verification')
+  }
+  return { ca: readFileSync(file, 'utf8'), rejectUnauthorized: true }
+}
 export function integerEnv(name: string, fallback: number, min: number, max: number): number {
   const value = Number(process.env[name] ?? fallback)
   if (!Number.isInteger(value) || value < min || value > max) throw new Error(`Invalid ${name}: expected integer ${min}..${max}`)

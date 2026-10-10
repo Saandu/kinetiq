@@ -938,3 +938,7 @@ Secret references, probes, update strategies, Jobs, NetworkPolicies and resource
 Then read [Phase 1: database backups and recovery](lessons/PHASE_1_DATABASE_BACKUPS.md)
 for CloudNativePG, certificate validation, WAL, fresh-volume restoration,
 retained-volume recovery and the measured LocalStack persistence limitation.
+
+Continue with [Phase 1: the live pipeline and scaling](lessons/PHASE_1_PIPELINE_SCALING.md)
+for the moving Kubernetes dashboard, verified database TLS, dynamic service DNS,
+runtime network boundaries, bounded queue scaling and practical inspection exercises.

@@ -268,10 +268,9 @@ npm run k8s:verify
 
 Tools and cluster credentials are stored in ignored `.tools/k8s` on the repository
 drive. Setup verifies pinned download checksums. The single k3d node has an 8 GiB
-memory cap; API and future ingress ports bind to loopback. `npm run k8s:stop`
-preserves the cluster; `npm run k8s:up` starts it again. Application deployment
-is a subsequent Phase 1 step. The dashboard
-currently runs through Compose. See the [cluster lesson](docs/lessons/PHASE_1_CLUSTER.md).
+memory cap; API and ingress ports bind to loopback. `npm run k8s:stop`
+preserves the cluster; `npm run k8s:up` starts it again. The Kubernetes dashboard
+runs on port 3102 after application setup. See the [cluster lesson](docs/lessons/PHASE_1_CLUSTER.md).
 
 The application chart can now be checked without starting Kubernetes:
 
@@ -304,3 +303,27 @@ LocalStack Hobby S3 is ephemeral across emulator restarts; a local PVC does not
 change that. This is a local protocol/recovery test, not independent cloud backup
 durability. Keep Compose and Kubernetes separate on the 16 GB laptop. See the
 [database recovery lesson](docs/lessons/PHASE_1_DATABASE_BACKUPS.md).
+
+The full local Kubernetes pipeline and bounded KEDA scaling are implemented:
+
+```sh
+npm run k8s:app
+npm run k8s:scaling
+npm run k8s:app:verify
+npm run k8s:boundaries:verify
+npm run k8s:scaling:config
+npm run k8s:scaling:verify
+```
+
+Open http://127.0.0.1:3102. Twelve fictional devices reach the dashboard through
+MQTT, SQS, PostgreSQL and the API. Acceptance requires new readings during the
+check and compares API metrics to database rows. Database connections verify TLS
+certificates. Runtime boundary tests exercise MQTT authentication, device ACLs
+and NetworkPolicy denial.
+
+Normal demo traffic uses one ingest worker. A controlled 200-message backlog
+demonstrates scaling to three ready workers and returning to one; it is not a
+throughput benchmark. Helm reserves peak worker memory plus rolling surges and
+setup Jobs: 2,304 MiB locally and 2,560 MiB in CI, excluding platform resources.
+Argo CD and disposable Kubernetes CI verification remain the next checkpoint.
+Read the [pipeline and scaling lesson](docs/lessons/PHASE_1_PIPELINE_SCALING.md).
