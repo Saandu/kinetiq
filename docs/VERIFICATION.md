@@ -66,3 +66,11 @@ checks local scaling bounds and seven unsafe changes without cluster access;
 The separate `k8s:database:verify` drill verifies fresh-volume S3 recovery.
 See [the pipeline lesson](lessons/PHASE_1_PIPELINE_SCALING.md) for prerequisites,
 cleanup and the distinction between capacity measurements and this controlled test.
+
+`npm run k8s:gitops:config` validates both GitOps chart profiles against strict
+Kubernetes schemas, checks self-contained PreSync hooks, bounded ownership and
+the KEDA replica exclusion. `npm run k8s:gitops:verify` checks the reconciled Git
+SHA, successful hooks, live drift repair and fresh pipeline data. Static checks
+run on PRs without secrets; the disposable cluster/recovery job runs on trusted
+main pushes or an explicit maintainer dispatch. Its result must be verified on
+GitHub before claiming the remote Kubernetes CI gate has passed.

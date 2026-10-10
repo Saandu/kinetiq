@@ -1,0 +1,7 @@
+{
+  "version": "3.5.4",
+  "url": "https://raw.githubusercontent.com/argoproj/argo-cd/v3.5.4/manifests/core-install.yaml",
+  "sha256": "7f6e38f3d1826c2ab92b22c04160dec3778563b84bdafd3f262c2353edf34602",
+  "image": "quay.io/argoproj/argocd:v3.5.4@sha256:49dff79439bb38b1b942b19a113fe1fec7e6b6c671ddf9fe6a4a7c46bde0b77b",
+  "redisImage": "public.ecr.aws/docker/library/redis:8.2.3-alpine@sha256:08ad0b1d280850169a790dba1393ff7a90aef951fc19632cf4d3ce4f78e679ba"
+}

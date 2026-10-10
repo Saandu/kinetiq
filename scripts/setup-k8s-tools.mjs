@@ -1,12 +1,12 @@
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, writeFile, rename, copyFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, rename, copyFile, chmod } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 export const root = fileURLToPath(new URL('../', import.meta.url));
 export const toolDirectory = path.join(root, '.tools', 'k8s');
-export const binDirectory = path.join(toolDirectory, 'bin');
+export const binDirectory = path.join(toolDirectory, process.platform === 'win32' ? 'bin' : 'bin-linux');
 export const kubeconfig = path.join(toolDirectory, 'kinetiq.kubeconfig');
 export const pins = JSON.parse(await readFile(path.join(root, 'infra/k8s/local/tools.json'), 'utf8'));
 export function run(program, args, options = {}) {
@@ -18,17 +18,18 @@ export function run(program, args, options = {}) {
   if (result.status !== 0) throw new Error(`${path.basename(program)} exited with ${result.status}`);
   return result.stdout;
 }
-export function tool(name) { return path.join(binDirectory, `${name}.exe`); }
+export function tool(name) { return path.join(binDirectory, `${name}${process.platform === 'win32' ? '.exe' : ''}`); }
 const hash = (data) => createHash('sha256').update(data).digest('hex');
 
 export async function install() {
-  if (process.platform !== 'win32' || process.arch !== 'x64') {
-    throw new Error('This initial local tool installer supports Windows x64 only.');
+  if (!['win32', 'linux'].includes(process.platform) || process.arch !== 'x64') {
+    throw new Error('The pinned tool installer supports Windows and Linux x64.');
   }
   const downloads = path.join(toolDirectory, 'downloads');
   await mkdir(downloads, { recursive: true });
   await mkdir(binDirectory, { recursive: true });
-  for (const [name, pin] of Object.entries(pins)) {
+  for (const [name, base] of Object.entries(pins)) {
+    const pin = process.platform === 'linux' ? { ...base, ...base.linux } : base;
     const archive = path.join(downloads, path.basename(new URL(pin.url).pathname));
     let bytes;
     try { bytes = await readFile(archive); } catch (error) {
@@ -46,13 +47,16 @@ export async function install() {
     if (hash(bytes) !== pin.sha256) throw new Error(`${name} SHA-256 mismatch`);
     if (name === 'helm' || name === 'kubeconform') {
       const extracted = path.join(toolDirectory, `${name}-extracted`);
-      const entry = name === 'helm' ? 'windows-amd64/helm.exe' : 'kubeconform.exe';
+      const entry = name === 'helm'
+        ? `${process.platform === 'win32' ? 'windows' : 'linux'}-amd64/helm${process.platform === 'win32' ? '.exe' : ''}`
+        : `kubeconform${process.platform === 'win32' ? '.exe' : ''}`;
       await mkdir(extracted, { recursive: true });
-      run('tar.exe', ['-xf', archive, '-C', extracted, entry]);
+      run(process.platform === 'win32' ? 'tar.exe' : 'tar', ['-xf', archive, '-C', extracted, entry]);
       await copyFile(path.join(extracted, entry), tool(name));
     } else {
       await writeFile(tool(name), bytes);
     }
+    if (process.platform === 'linux') await chmod(tool(name), 0o755);
     console.log(`${name}: checksum verified`);
   }
   verifyTools();

@@ -15,6 +15,12 @@ metadata:
   name: {{ $.Release.Name }}-{{ $name }}-{{ $.Release.Revision }}
   labels:
     {{- include "kinetiq.labels" $ | nindent 4 }}
+  {{- if $.Values.gitops.enabled }}
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+    argocd.argoproj.io/sync-wave: "-1"
+  {{- end }}
 spec:
   backoffLimit: 6
   activeDeadlineSeconds: 600
@@ -39,7 +45,15 @@ spec:
         - name: {{ $name }}
           image: {{ $.Values.components.api.image | quote }}
           imagePullPolicy: {{ $.Values.imagePullPolicy }}
+          {{- if $.Values.gitops.enabled }}
+          # Hooks run before Sync ConfigMaps exist. Carry this revision's script
+          # inside the Job; bootstrap provides only stable SAs and network rules.
+          command: [node, --input-type=module, -e]
+          args:
+            - {{ $.Files.Get (printf "files/%s.mjs" $name) | quote }}
+          {{- else }}
           command: [node, /app/infra/k8s/{{ $name }}.mjs]
+          {{- end }}
           securityContext:
             {{- include "kinetiq.security" $ | nindent 12 }}
           resources:
@@ -48,11 +62,16 @@ spec:
             {{- if eq $name "migrations" }}
             - {name: DATABASE_URL_FILE, value: /secrets/admin/database-url}
             - {name: DATABASE_CA_FILE, value: /secrets/ca/ca.crt}
+            {{- if $.Values.gitops.enabled }}
+            - {name: DATABASE_CONNECT_HOST, value: "kinetiq-db-rw.{{ $.Release.Namespace }}.svc.cluster.local"}
+            {{- end }}
             {{- else }}
             - {name: SQS_QUEUE_URL, value: {{ $.Values.queue.url | quote }}}
             {{- end }}
           volumeMounts:
+            {{- if not $.Values.gitops.enabled }}
             - {name: setup, mountPath: /app/infra/k8s, readOnly: true}
+            {{- end }}
             - {name: tmp, mountPath: /tmp}
             {{- if eq $name "migrations" }}
             - {name: database-ca, mountPath: /secrets/ca, readOnly: true}
@@ -61,8 +80,10 @@ spec:
             {{- end }}
             {{- end }}
       volumes:
+        {{- if not $.Values.gitops.enabled }}
         - name: setup
           configMap: {name: {{ $.Release.Name }}-setup}
+        {{- end }}
         - name: tmp
           emptyDir: {sizeLimit: 64Mi}
         {{- if eq $name "migrations" }}

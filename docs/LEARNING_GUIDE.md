@@ -607,6 +607,10 @@ Extra components that run in the cluster to provide platform features:
 
 ## 4.7 GitOps with Argo CD
 
+The local implementation is explained in
+[the Phase 1 GitOps and CI lesson](lessons/PHASE_1_GITOPS_CI.md), including fresh
+install hook dependencies, KEDA field ownership and the local Git mirror.
+
 **The problem.** Something has to apply the Helm chart to the cluster on every release. The obvious way is to let CI run `helm upgrade` against the cluster. Downsides: CI needs powerful cluster credentials (a juicy target), and if someone changes the cluster by hand, nothing notices that it no longer matches git.
 
 **GitOps** flips it: the cluster *pulls* its desired state from git.

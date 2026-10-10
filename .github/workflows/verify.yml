@@ -4,6 +4,7 @@ on:
   push:
     branches: ['**']
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -66,9 +67,80 @@ jobs:
         if: always()
         run: docker compose down
 
+  kubernetes-config:
+    name: Verify pinned Kubernetes and GitOps configuration
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run k8s:tools
+      - run: npm run helm:verify
+      - run: npm run k8s:scaling:config
+      - run: npm run k8s:gitops:config
+
+  kubernetes:
+    name: Disposable cluster, S3 restore and GitOps pipeline
+    needs: [verify, kubernetes-config]
+    # Fork PRs and arbitrary branch pushes never receive the emulator secret.
+    # A maintainer can dispatch this workflow on a reviewed branch explicitly.
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Install pinned tools and build all local images
+        run: |
+          npm run k8s:tools
+          npm run db:image
+          npm run services:images
+          docker build -t kinetiq-web:local -f infra/docker/web/Dockerfile .
+      - name: Supply the emulator token without logging it
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN_CI }}
+        run: |
+          node --input-type=module -e "import {writeFileSync} from 'node:fs'; const token=process.env.LOCALSTACK_AUTH_TOKEN; if(!token || /[\r\n]/.test(token)) throw new Error('CI LocalStack token missing or invalid'); writeFileSync('.env.local','LOCALSTACK_AUTH_TOKEN='+token+'\n',{mode:0o600});"
+      - name: Bootstrap a fresh cluster and verify fresh-volume S3 recovery
+        run: |
+          npm run k8s:up
+          npm run k8s:images
+          npm run k8s:operators
+          npm run k8s:database
+          # No simulator is running yet: source/restore fingerprints are stable.
+          npm run k8s:database:verify
+          npm run k8s:messaging
+      - name: Reconcile the committed branch and verify the running pipeline
+        run: |
+          npm run k8s:gitops -- ci
+          npm run k8s:scaling
+          npm run k8s:gitops:verify
+          npm run k8s:boundaries:verify
+          npm run k8s:scaling:verify
+          npm run k8s:gitops:status
+      - name: Remove disposable cluster and local secret files
+        if: always()
+        run: |
+          if [ -x .tools/k8s/bin-linux/k3d ]; then
+            .tools/k8s/bin-linux/k3d cluster delete kinetiq-local
+          fi
+          # This job runs on an ephemeral runner; never copy these into artifacts.
+          rm -f .env.local .tools/k8s/kinetiq.kubeconfig
+          rm -rf .tools/k8s/secrets
+
   deploy:
     name: Deploy Firebase Hosting
-    needs: [verify, pipeline]
+    needs: [verify, pipeline, kubernetes-config, kubernetes]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10

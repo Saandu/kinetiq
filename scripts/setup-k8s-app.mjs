@@ -3,6 +3,9 @@ import { assertLocalCluster, kubectl, namespace, capture } from './local-kuberne
 import path from 'node:path';
 
 assertLocalCluster();
+const argoInstalled = kubectl(['get', 'crd', 'applications.argoproj.io', '--ignore-not-found', '-o', 'name'], capture).trim();
+const argo = argoInstalled ? kubectl(['get', 'applications.argoproj.io', 'kinetiq', '-n', 'argocd', '--ignore-not-found', '-o', 'name'], capture) : '';
+if (argo.trim()) throw new Error('Argo owns this application. Commit and run k8s:gitops:publish instead of Helm upgrade.');
 // Platform setup owns the broker/database; Helm owns application resources.
 run(process.execPath, ['scripts/setup-k8s-database.mjs']);
 run(process.execPath, ['scripts/setup-k8s-messaging.mjs']);

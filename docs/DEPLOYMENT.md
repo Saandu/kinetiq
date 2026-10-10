@@ -91,3 +91,13 @@ bounded backlog. This remains a read-only local backend with emulated AWS.
 Public backend hosting and cloud identity are later deployment gates.
 See [the pipeline lesson](lessons/PHASE_1_PIPELINE_SCALING.md) for commands,
 memory/connection budgets, emulator restart behavior and recovery boundaries.
+
+## Local GitOps adoption
+
+After database and broker bootstrap, `npm run k8s:gitops` installs pinned Argo Core
+and reconciles the current committed branch from an internal Git mirror.
+After adoption, commit chart changes and run `npm run k8s:gitops:publish`; the
+direct `k8s:app` Helm command refuses to compete with Argo. Check status with
+`npm run k8s:gitops:status` and run `npm run k8s:gitops:verify` for hook and drift
+proof. The local mirror does not push to GitHub or change Firebase Hosting.
+See [the GitOps lesson](lessons/PHASE_1_GITOPS_CI.md) for boundaries and CI.

@@ -49,7 +49,12 @@
     "k8s:scaling": "node scripts/setup-k8s-scaling.mjs",
     "k8s:scaling:verify": "node scripts/verify-k8s-scaling.mjs",
     "k8s:boundaries:verify": "node scripts/verify-k8s-boundaries.mjs",
-    "k8s:scaling:config": "node scripts/verify-k8s-scaling-config.mjs"
+    "k8s:scaling:config": "node scripts/verify-k8s-scaling-config.mjs",
+    "k8s:gitops": "node scripts/setup-k8s-gitops.mjs",
+    "k8s:gitops:publish": "node scripts/publish-k8s-git.mjs",
+    "k8s:gitops:status": "node scripts/verify-k8s-gitops.mjs status",
+    "k8s:gitops:verify": "node scripts/verify-k8s-gitops.mjs",
+    "k8s:gitops:config": "node scripts/verify-gitops-config.mjs"
   },
   "devDependencies": {
     "@types/node": "24.19.1",
