@@ -12,6 +12,11 @@ the rendered result with the cluster. Argo uses `helm template`, not Helm releas
 upgrades. Consequently a Helm revision counter is not a deployment history under
 Argo; the Application records the actual Git SHA instead.
 
+Our drift check changes the existing `checksum/config` field that Git owns.
+Three-way apply can preserve unrelated extra annotations created by another tool,
+so adding a new annotation is not proof of managed-field drift repair. A commit
+that changes only documentation also need not roll out workloads or rerun hooks.
+
 ## How the local setup works
 
 `scripts/setup-k8s-gitops.mjs` verifies an upstream Core manifest checksum, pins
@@ -73,6 +78,8 @@ It then starts the broker, reconciles the committed chart, checks fresh readings
 proves runtime network/MQTT boundaries, exercises bounded scaling and checks Argo
 drift repair. An `always()` cleanup removes the disposable cluster and local
 secret files. No cluster credentials or auth token become build artifacts.
+Checkout uses the exact triggering SHA, then names that commit locally for the
+mirror. A later push to the same branch cannot silently change the tested code.
 
 Main's Firebase deployment waits for these gates as well as the existing checks.
 Dispatching on a development branch never deploys Firebase. A workflow added

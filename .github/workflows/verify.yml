@@ -94,7 +94,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ github.sha }}
+      - name: Name the exact checked-out commit for the local Git mirror
+        run: git switch -C "$GITHUB_REF_NAME" "$GITHUB_SHA"
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
