@@ -199,8 +199,8 @@ Checkpoint gates passed: builds and image import/non-root checks, lint/types,
 Helm profiles, twenty-one Helm unsafe-change checks, seven local scaling
 unsafe-change checks, Nginx image smoke, script lint and a zero-vulnerability
 production dependency audit. The local cluster is left running for inspection.
-No cloud resources or global memory changes were made. Argo CD and disposable
-Kubernetes CI/restore checks are next; Phase 1 is not yet complete. Read
+No cloud resources or global memory changes were made. At this earlier checkpoint,
+Argo CD and disposable Kubernetes CI/restore checks remained; their results follow. Read
 [the pipeline and scaling lesson](lessons/PHASE_1_PIPELINE_SCALING.md).
 
 The GitOps checkpoint now runs pinned Argo CD Core against a committed local
@@ -223,7 +223,8 @@ Windows and Linux pinned CLI installation/rendering passed. GitHub's Linux
 build/package tests and static Helm/scaling/GitOps checks passed, followed by
 the fresh-cluster/S3 recovery/GitOps runtime gate at commit `4c300b0` in
 [run 38082106322](https://github.com/Saandu/kinetiq/actions/runs/38082106322).
-The final complete-bootstrap and every-push lint gates are being verified. The
+The complete local bootstrap and pinned Dockerfile lint passed afterward. The
+workflow now runs both transport and Kubernetes gates on every repository push. The
 workflow checks out the exact triggering SHA, guards the CI token to trusted
 runs and cleans up the temporary cluster and local secret files. Read
 [the GitOps and CI lesson](lessons/PHASE_1_GITOPS_CI.md).

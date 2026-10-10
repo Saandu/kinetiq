@@ -11,6 +11,11 @@ if (process.argv[2] === 'status') {
 } else {
   const sha = run('git',['rev-parse','HEAD'],capture).trim();
   await waitApplication(sha);
+  // Self-healing may replace the last operation with a partial drift repair.
+  // Explicitly exercise a full sync before checking both idempotent hooks.
+  kubectl(['patch','application/kinetiq','-n',argoNamespace,'--type=merge','-p',
+    JSON.stringify({operation:{sync:{revision:sha,prune:true}}})]);
+  await waitApplication(sha);
   const app = application();
   assert.equal(app.spec.source.repoURL,repository);
   assert.equal(app.spec.syncPolicy.syncOptions.includes('RespectIgnoreDifferences=true'),true);
@@ -21,6 +26,13 @@ if (process.argv[2] === 'status') {
   assert.deepEqual(project.spec.clusterResourceWhitelist ?? [],[]);
   const allowed = project.spec.namespaceResourceWhitelist.map(r=>r.kind);
   for(const kind of ['Secret','PersistentVolumeClaim','Cluster','Namespace']) assert.ok(!allowed.includes(kind));
+  const settings = JSON.parse(kubectl(['get','configmap','argocd-cm','-n',argoNamespace,'-o','json'],capture));
+  assert.equal(settings.data['application.resourceTrackingMethod'],'annotation');
+  for(const name of ['localstack','mosquitto','kinetiq-git']) {
+    const platform = JSON.parse(kubectl(['get','deployment',name,'-n',namespace,'-o','json'],capture));
+    assert.equal(platform.metadata.annotations?.['argocd.argoproj.io/tracking-id'],undefined,'Bootstrap resources must not belong to the Argo application');
+    assert.ok(!app.status.resources.some(r=>r.kind==='Deployment' && r.name===name));
+  }
   // Change a field that Git owns. Three-way apply can preserve unrelated extra
   // annotations, so adding a brand-new annotation is not a useful drift test.
   const before = JSON.parse(kubectl(['get','deployment/kinetiq-web','-n',namespace,'-o','json'],capture));

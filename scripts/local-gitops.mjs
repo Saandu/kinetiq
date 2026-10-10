@@ -44,14 +44,15 @@ export async function waitApplication(revision, timeout = 240_000) {
   const deadline = Date.now() + timeout;
   let state;
   while (Date.now() < deadline) {
-    state = application().status;
+    const current = application();
+    state = current.status;
     if (state?.operationState?.syncResult?.revision === revision &&
         ['Failed','Error'].includes(state.operationState.phase)) {
       throw new Error(`Argo sync failed: ${state.operationState.message}`);
     }
-    if (state?.sync?.status === 'Synced' && state?.health?.status === 'Healthy' &&
+    if (!current.operation && state?.sync?.status === 'Synced' && state?.health?.status === 'Healthy' &&
       state.sync.revision === revision && state.operationState?.phase === 'Succeeded') {
-      console.log(`Argo: Synced, Healthy, successful hooks at ${revision}`); return state;
+      console.log(`Argo: Synced, Healthy, successful reconciliation at ${revision}`); return state;
     }
     await new Promise(resolve => setTimeout(resolve, 3000));
   }

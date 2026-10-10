@@ -37,6 +37,10 @@ ServiceAccounts, Ingress and NetworkPolicies in `kinetiq-local`. Argo cannot pru
 database volumes, credential Secrets, namespaces or CloudNativePG resources
 through this project. This boundary constrains Application manifests; the trusted
 bootstrap administrator still has the permissions needed to install operators.
+Ownership explicitly uses Argo's tracking annotation. Platform Pods share
+application routing labels, so treating that label as ownership could incorrectly
+adopt and prune the broker or emulator Deployment. Runtime verification checks
+that those Deployments and the Git mirror remain outside the Application.
 
 ## Why migration ordering needs care
 
@@ -143,6 +147,13 @@ Phase 2 will use published immutable images and the remote Git repository.
 The emulator's S3 is still ephemeral and does not prove host-loss recovery.
 
 ## Practice
+
+The verifier requests a full sync before checking the two migration/queue hooks.
+Argo records its most recent operation: a later partial drift repair can replace
+the earlier full-sync result. Checking that history alone would wrongly report
+missing hooks. The full sync exercises their repeatability; the subsequent drift
+test exercises self-healing. Pending operations must finish before a prior
+`Succeeded` status can count as current evidence.
 
 1. Inspect the Application status and identify the committed SHA, health and
    operation result. Why is `Healthy` alone insufficient evidence of a deployment?

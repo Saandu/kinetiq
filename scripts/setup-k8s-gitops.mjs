@@ -29,7 +29,9 @@ for (const o of objects) {
   for (const subject of o.subjects ?? []) if (subject.kind === 'ServiceAccount') subject.namespace = argoNamespace;
   if (o.kind === 'ConfigMap' && o.metadata.name === 'argocd-cm') o.data = {
     'timeout.reconciliation': '30s', 'timeout.reconciliation.jitter': '0s',
-    'resource.exclusions': '- apiGroups: ["cilium.io"]\n  kinds: [CiliumIdentity]\n  clusters: ["*"]\n',
+    // Platform Pods share application routing labels. Ownership must use Argo's
+    // tracking annotation, so pruning never adopts those external resources.
+    'application.resourceTrackingMethod': 'annotation',
   };
   if (o.kind === 'ConfigMap' && o.metadata.name === 'argocd-cmd-params-cm') o.data = {
     'controller.status.processors': '2', 'controller.operation.processors': '1',

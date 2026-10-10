@@ -347,7 +347,8 @@ on a fresh checkout; Docker image builds compile a separate filesystem.
 After adoption, use GitOps publication instead of `k8s:app`. The full Linux
 CI cluster/recovery/GitOps checks passed in
 [run 38082106322](https://github.com/Saandu/kinetiq/actions/runs/38082106322).
-The final Dockerfile-lint and complete-bootstrap gates are being verified. Read the
+Pinned Dockerfile lint and the complete local bootstrap also passed. The workflow
+now runs the transport and fresh-cluster gates on every repository push. Read the
 [GitOps and CI lesson](docs/lessons/PHASE_1_GITOPS_CI.md).
 
 For the complete local setup from a committed checkout with Docker running,

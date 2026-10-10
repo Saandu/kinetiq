@@ -70,7 +70,11 @@ jobs:
           npm run local:verify
       - name: Stop local application
         if: always()
-        run: docker compose down
+        run: |
+          # Compose parses env_file even during down; setup may have failed first.
+          touch .env.local
+          docker compose down
+          rm -f .env.local
 
   kubernetes-config:
     name: Verify pinned Kubernetes and GitOps configuration
