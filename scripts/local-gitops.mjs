@@ -5,7 +5,7 @@ import { root, run, tool, toolDirectory } from './setup-k8s-tools.mjs';
 import { kubectl, capture, namespace } from './local-kubernetes.mjs';
 
 export const argoNamespace = 'argocd';
-export const repository = `http://kinetiq-git.${namespace}.svc.cluster.local:8080/kinetiq.git`;
+export const repository = `git://kinetiq-git.${namespace}.svc.cluster.local:9418/kinetiq.git`;
 export const pin = JSON.parse(await readFile(path.join(root, 'infra/k8s/local/argocd.json'), 'utf8'));
 export const parse = text => parseAllDocuments(text, {uniqueKeys: true}).map(document => {
   if (document.errors.length) throw new Error(document.errors.map(e => e.message).join('\n'));
@@ -45,7 +45,8 @@ export async function waitApplication(revision, timeout = 240_000) {
   let state;
   while (Date.now() < deadline) {
     state = application().status;
-    if (state?.operationState?.phase === 'Failed' || state?.operationState?.phase === 'Error') {
+    if (state?.operationState?.syncResult?.revision === revision &&
+        ['Failed','Error'].includes(state.operationState.phase)) {
       throw new Error(`Argo sync failed: ${state.operationState.message}`);
     }
     if (state?.sync?.status === 'Synced' && state?.health?.status === 'Healthy' &&

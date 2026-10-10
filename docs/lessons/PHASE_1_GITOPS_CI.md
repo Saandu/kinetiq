@@ -20,8 +20,8 @@ unused ApplicationSet controller. Core has no public web server. The steady
 container memory limits are 896 MiB plus 64 MiB for the Git mirror; limits are
 ceilings, not measured usage. Bootstrap remains a separate administrator step.
 
-`scripts/publish-k8s-git.mjs` makes a bare clone of the committed branch, generates
-Git's HTTP metadata and copies that repository into an internal Nginx Pod. An
+`scripts/publish-k8s-git.mjs` makes a bare clone of the committed branch, copies
+that repository into an internal read-only Git daemon Pod. An
 atomic symlink switch publishes it only after copying completes. This is real Git
 history, not a copy of the working directory. Ignored credentials and uncommitted
 edits are excluded. Argo's network rules permit the internal mirror and Kubernetes

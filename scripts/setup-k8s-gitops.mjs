@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { isDeepStrictEqual } from 'node:util';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { toolDirectory } from './setup-k8s-tools.mjs';
@@ -50,7 +51,7 @@ apply([{apiVersion:'networking.k8s.io/v1',kind:'NetworkPolicy',metadata:{name:'a
   {to:[{namespaceSelector:{matchLabels:{'kubernetes.io/metadata.name':argoNamespace}}}],ports:[{protocol:'TCP',port:6379},{protocol:'TCP',port:8081}]},
   {to:[{namespaceSelector:{matchLabels:{'kubernetes.io/metadata.name':'kube-system'}},podSelector:{matchLabels:{'k8s-app':'kube-dns'}}}],ports:[{protocol:'UDP',port:53},{protocol:'TCP',port:53}]},
   {to:[{ipBlock:{cidr:`${apiIp}/32`}},{ipBlock:{cidr:`${nodeIp}/32`}}],ports:[{protocol:'TCP',port:443},{protocol:'TCP',port:6443}]},
-  {to:[{namespaceSelector:{matchLabels:{'kubernetes.io/metadata.name':namespace}},podSelector:{matchLabels:{'app.kubernetes.io/name':'kinetiq-git'}}}],ports:[{protocol:'TCP',port:8080}]},
+  {to:[{namespaceSelector:{matchLabels:{'kubernetes.io/metadata.name':namespace}},podSelector:{matchLabels:{'app.kubernetes.io/name':'kinetiq-git'}}}],ports:[{protocol:'TCP',port:9418}]},
 ]}}]);
 for (const name of ['applications', 'appprojects']) kubectl(['wait', `crd/${name}.argoproj.io`, '--for=condition=Established', '--timeout=60s']);
 for (const name of ['deployment/argocd-redis', 'deployment/argocd-repo-server', 'statefulset/argocd-application-controller']) {
@@ -58,13 +59,11 @@ for (const name of ['deployment/argocd-redis', 'deployment/argocd-repo-server', 
 }
 
 // Storage contains only committed Git history, never application/database data.
-const nginx = `pid /tmp/nginx.pid; events {} http { access_log /dev/stdout; error_log /dev/stderr; client_body_temp_path /tmp/client; proxy_temp_path /tmp/proxy; fastcgi_temp_path /tmp/fastcgi; uwsgi_temp_path /tmp/uwsgi; scgi_temp_path /tmp/scgi; server { listen 8080; root /data; location / { try_files $uri =404; } } }`;
 apply([
   {apiVersion:'v1',kind:'PersistentVolumeClaim',metadata:{name:'kinetiq-git',namespace},spec:{accessModes:['ReadWriteOnce'],storageClassName:'local-path',resources:{requests:{storage:'512Mi'}}}},
-  {apiVersion:'v1',kind:'ConfigMap',metadata:{name:'kinetiq-git',namespace},data:{'nginx.conf':nginx}},
-  {apiVersion:'apps/v1',kind:'Deployment',metadata:{name:'kinetiq-git',namespace},spec:{replicas:1,strategy:{type:'Recreate'},selector:{matchLabels:{'app.kubernetes.io/name':'kinetiq-git'}},template:{metadata:{labels:{'app.kubernetes.io/name':'kinetiq-git'}},spec:{automountServiceAccountToken:false,securityContext:{runAsNonRoot:true,runAsUser:101,runAsGroup:101,fsGroup:101,seccompProfile:{type:'RuntimeDefault'}},containers:[{name:'git',image:'kinetiq-web:local',imagePullPolicy:'Never',command:['nginx','-c','/config/nginx.conf','-g','daemon off;'],securityContext:{readOnlyRootFilesystem:true,allowPrivilegeEscalation:false,capabilities:{drop:['ALL']}},resources:{requests:{cpu:'10m',memory:'16Mi'},limits:{cpu:'100m',memory:'64Mi'}},ports:[{containerPort:8080}],readinessProbe:{tcpSocket:{port:8080}},volumeMounts:[{name:'git',mountPath:'/data'},{name:'config',mountPath:'/config',readOnly:true},{name:'tmp',mountPath:'/tmp'}]}],volumes:[{name:'git',persistentVolumeClaim:{claimName:'kinetiq-git'}},{name:'config',configMap:{name:'kinetiq-git'}},{name:'tmp',emptyDir:{sizeLimit:'64Mi'}}]}}}},
-  {apiVersion:'v1',kind:'Service',metadata:{name:'kinetiq-git',namespace},spec:{type:'ClusterIP',selector:{'app.kubernetes.io/name':'kinetiq-git'},ports:[{port:8080,targetPort:8080}]}},
-  {apiVersion:'networking.k8s.io/v1',kind:'NetworkPolicy',metadata:{name:'kinetiq-git',namespace},spec:{podSelector:{matchLabels:{'app.kubernetes.io/name':'kinetiq-git'}},policyTypes:['Ingress','Egress'],egress:[],ingress:[{from:[{namespaceSelector:{matchLabels:{'kubernetes.io/metadata.name':argoNamespace}},podSelector:{matchLabels:{'app.kubernetes.io/name':'argocd-repo-server'}}}],ports:[{protocol:'TCP',port:8080}]}]}},
+  {apiVersion:'apps/v1',kind:'Deployment',metadata:{name:'kinetiq-git',namespace},spec:{replicas:1,strategy:{type:'Recreate'},selector:{matchLabels:{'app.kubernetes.io/name':'kinetiq-git'}},template:{metadata:{labels:{'app.kubernetes.io/name':'kinetiq-git'}},spec:{automountServiceAccountToken:false,securityContext:{runAsNonRoot:true,runAsUser:999,runAsGroup:999,fsGroup:999,seccompProfile:{type:'RuntimeDefault'}},containers:[{name:'git',image:pin.image,imagePullPolicy:'IfNotPresent',command:['git','daemon','--reuseaddr','--export-all','--base-path=/data','--listen=0.0.0.0','--port=9418','/data'],securityContext:{readOnlyRootFilesystem:true,allowPrivilegeEscalation:false,capabilities:{drop:['ALL']}},resources:{requests:{cpu:'10m',memory:'16Mi'},limits:{cpu:'100m',memory:'64Mi'}},ports:[{containerPort:9418}],readinessProbe:{tcpSocket:{port:9418}},volumeMounts:[{name:'git',mountPath:'/data'},{name:'tmp',mountPath:'/tmp'}]}],volumes:[{name:'git',persistentVolumeClaim:{claimName:'kinetiq-git'}},{name:'tmp',emptyDir:{sizeLimit:'64Mi'}}]}}}},
+  {apiVersion:'v1',kind:'Service',metadata:{name:'kinetiq-git',namespace},spec:{type:'ClusterIP',selector:{'app.kubernetes.io/name':'kinetiq-git'},ports:[{port:9418,targetPort:9418}]}},
+  {apiVersion:'networking.k8s.io/v1',kind:'NetworkPolicy',metadata:{name:'kinetiq-git',namespace},spec:{podSelector:{matchLabels:{'app.kubernetes.io/name':'kinetiq-git'}},policyTypes:['Ingress','Egress'],egress:[],ingress:[{from:[{namespaceSelector:{matchLabels:{'kubernetes.io/metadata.name':argoNamespace}},podSelector:{matchLabels:{'app.kubernetes.io/name':'argocd-repo-server'}}}],ports:[{protocol:'TCP',port:9418}]}]}},
 ]);
 kubectl(['rollout','status','deployment/kinetiq-git','-n',namespace,'--timeout=120s']);
 
@@ -73,8 +72,18 @@ kubectl(['rollout','status','deployment/kinetiq-git','-n',namespace,'--timeout=1
 const prerequisites = render(profile).filter(o =>
   o.kind === 'ServiceAccount' && ['kinetiq-migrations','kinetiq-queues'].includes(o.metadata.name) ||
   o.kind === 'NetworkPolicy' && ['kinetiq-default-deny','kinetiq-dns','kinetiq-migrations-egress','kinetiq-queues-egress'].includes(o.metadata.name));
-for (const o of prerequisites) o.metadata.namespace = namespace;
-apply(prerequisites);
+for (const o of prerequisites) {
+  o.metadata.namespace = namespace;
+  const live = kubectl(['get',o.kind,o.metadata.name,'-n',namespace,'--ignore-not-found','-o','json'],capture).trim();
+  if (!live) { apply([o]); continue; }
+  const existing = JSON.parse(live);
+  if (o.kind === 'ServiceAccount') {
+    if (existing.automountServiceAccountToken !== false) throw new Error('Existing hook identity enables API tokens');
+  } else {
+    const normalize = spec => ({...spec,ingress:spec.ingress??[],egress:spec.egress??[]});
+    if (!isDeepStrictEqual(normalize(existing.spec),normalize(o.spec))) throw new Error(`Existing hook policy differs: ${o.metadata.name}`);
+  }
+}
 const sha = await publish();
 apply([project(), desired]);
 kubectl(['annotate','application/kinetiq','-n',argoNamespace,'argocd.argoproj.io/refresh=hard','--overwrite']);
