@@ -202,3 +202,28 @@ production dependency audit. The local cluster is left running for inspection.
 No cloud resources or global memory changes were made. Argo CD and disposable
 Kubernetes CI/restore checks are next; Phase 1 is not yet complete. Read
 [the pipeline and scaling lesson](lessons/PHASE_1_PIPELINE_SCALING.md).
+
+The GitOps checkpoint now runs pinned Argo CD Core against a committed local
+branch mirror. Controller, repo server and Redis have 896 MiB total steady
+limits; the non-root read-only Git daemon has a 64 MiB limit. The unused
+ApplicationSet controller and public Argo server are not installed. A measured
+node-memory sample was 3.36 GiB with the full pipeline and GitOps running under
+the existing 6.7 GiB Docker/WSL allocation.
+
+Both self-contained PreSync hooks succeeded before application Sync. A live
+change to Git's owned web checksum field was repaired, and acceptance proved
+fresh readings from all twelve devices with API/database metric agreement.
+Real MQTT/network boundary checks passed again after adoption. The 200-message
+scaling drill passed with Argo active, committing exactly 200 fixture rows and
+returning from three ready workers to one; Argo remained Healthy. Fixtures were
+removed. Git publication advanced the reconciled branch SHA without a GitHub
+credential in the cluster.
+
+Windows and Linux pinned CLI installation/rendering passed. GitHub's Linux
+build/package tests and static Helm/scaling/GitOps checks passed, followed by
+the fresh-cluster/S3 recovery/GitOps runtime gate at commit `4c300b0` in
+[run 38082106322](https://github.com/Saandu/kinetiq/actions/runs/38082106322).
+The final complete-bootstrap and every-push lint gates are being verified. The
+workflow checks out the exact triggering SHA, guards the CI token to trusted
+runs and cleans up the temporary cluster and local secret files. Read
+[the GitOps and CI lesson](lessons/PHASE_1_GITOPS_CI.md).

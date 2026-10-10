@@ -109,3 +109,30 @@ operator, metrics server and admission webhook images are pinned by digest in
 The runtime drill exercises its SQS scaler against the maintained LocalStack
 emulator and caps ingest at three workers. Downloads remain on D: under ignored
 `.tools/k8s/platform`. This does not establish cloud IAM/IRSA behavior.
+
+## Phase 1 GitOps controller
+
+Argo CD 3.5.4 was verified against the official GitHub latest stable release on
+10 October 2026. `infra/k8s/local/argocd.json` pins its Core manifest SHA-256,
+Argo container digest and the upstream manifest's Redis 8.2.3-alpine digest.
+The local installer omits the unused ApplicationSet controller, limits controller
+concurrency and supplies explicit resource limits. The read-only Git daemon
+reuses the same pinned Argo image, including its Git executable. Windows/Linux
+x64 tool download checksums are recorded separately in `tools.json`.
+Sources: [official release](https://github.com/argoproj/argo-cd/releases/tag/v3.5.4)
+and [versioned Core manifest](https://github.com/argoproj/argo-cd/blob/v3.5.4/manifests/core-install.yaml).
+
+The workflow pins maintained Node 24 Actions to verified upstream commit SHAs:
+checkout 7.0.1, setup-node 7.1.0, upload-artifact 7.0.2, download-artifact 8.0.2
+and Google authentication v3. The artifact upload/download combination retains
+archived directory delivery and is checked with a byte-for-byte round trip.
+The application still runs Node 24.21.0 from `.nvmrc`; an Action's own runtime
+and the runtime it installs are separate choices.
+Sources: [checkout](https://github.com/actions/checkout/releases/tag/v7.0.1),
+[setup-node](https://github.com/actions/setup-node/releases/tag/v7.1.0),
+[upload-artifact](https://github.com/actions/upload-artifact/releases/tag/v7.0.2),
+[download-artifact](https://github.com/actions/download-artifact/releases/tag/v8.0.2).
+
+Dockerfile lint uses hadolint 2.15.1, pinned to image digest
+`sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d`.
+[Official release](https://github.com/hadolint/hadolint/releases/tag/v2.15.1).

@@ -72,5 +72,5 @@ Kubernetes schemas, checks self-contained PreSync hooks, bounded ownership and
 the KEDA replica exclusion. `npm run k8s:gitops:verify` checks the reconciled Git
 SHA, successful hooks, live drift repair and fresh pipeline data. Static checks
 run on PRs without secrets; the disposable cluster/recovery job runs on trusted
-main pushes or an explicit maintainer dispatch. Its result must be verified on
+repository pushes or an explicit maintainer dispatch. Its result must be verified on
 GitHub before claiming the remote Kubernetes CI gate has passed.

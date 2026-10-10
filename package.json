@@ -54,7 +54,9 @@
     "k8s:gitops:publish": "node scripts/publish-k8s-git.mjs",
     "k8s:gitops:status": "node scripts/verify-k8s-gitops.mjs status",
     "k8s:gitops:verify": "node scripts/verify-k8s-gitops.mjs",
-    "k8s:gitops:config": "node scripts/verify-gitops-config.mjs"
+    "k8s:gitops:config": "node scripts/verify-gitops-config.mjs",
+    "docker:lint": "node scripts/lint-docker.mjs",
+    "k8s:bootstrap": "node scripts/bootstrap-k8s.mjs"
   },
   "devDependencies": {
     "@types/node": "24.19.1",

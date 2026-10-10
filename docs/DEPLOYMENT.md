@@ -101,3 +101,9 @@ direct `k8s:app` Helm command refuses to compete with Argo. Check status with
 `npm run k8s:gitops:status` and run `npm run k8s:gitops:verify` for hook and drift
 proof. The local mirror does not push to GitHub or change Firebase Hosting.
 See [the GitOps lesson](lessons/PHASE_1_GITOPS_CI.md) for boundaries and CI.
+
+`npm run k8s:bootstrap` runs the complete local setup from a committed checkout:
+tool installation, image builds/imports, platform/database/messaging, GitOps,
+scaling and fresh-data acceptance. Configure the root token and stop Compose
+first. Existing database volumes are preserved. CI uses the individual steps
+so the recovery drill can run before simulator writes begin.

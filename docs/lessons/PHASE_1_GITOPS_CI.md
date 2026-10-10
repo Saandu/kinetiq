@@ -69,8 +69,10 @@ the whole Deployment would hide real drift; managing replicas would fight KEDA.
 Static Helm, scaling and GitOps checks run without a LocalStack token, including
 on pull requests. The pinned CLI installer verifies separate Windows/Linux x64
 checksums and installs in the checkout's ignored tool directory.
+`npm run docker:lint` runs digest-pinned hadolint against all three Dockerfiles;
+health checks use exec-form commands and Node images specify UID/GID 1000.
 
-The Kubernetes job runs on trusted main pushes or an explicit maintainer workflow
+The Kubernetes job runs on trusted repository pushes or an explicit maintainer workflow
 dispatch. It creates a fresh k3d cluster, imports built images, installs operators
 and proves S3 recovery onto a separate volume **before** starting the simulator.
 Otherwise the source fingerprint would keep changing during the comparison.
@@ -81,13 +83,45 @@ secret files. No cluster credentials or auth token become build artifacts.
 Checkout uses the exact triggering SHA, then names that commit locally for the
 mirror. A later push to the same branch cannot silently change the tested code.
 
+The fresh runner caught a useful filesystem distinction: a Docker build compiles
+contracts **inside the image**, but `setup-k8s-messaging.mjs` imports contracts
+**on the host**. `npm ci` links the workspace without building its `dist` exports.
+CI therefore builds the host contracts package explicitly before bootstrap. Local
+generated files had masked the missing step. Fresh-checkout tests catch this kind
+of accidental dependency on yesterday's build.
+
+Actions are pinned to immutable commits for the maintained Node 24 releases.
+The runner OS uses the explicit Ubuntu 24.04 family rather than a moving label.
+The hosting build is uploaded and downloaded in CI; `verify-ci-artifact.mjs`
+compares every relative file path and SHA-256 hash. This checks the real artifact
+transport before Firebase delivery. A modified-byte negative check was rejected.
+
 Main's Firebase deployment waits for these gates as well as the existing checks.
 Dispatching on a development branch never deploys Firebase. A workflow added
 locally is not evidence of a successful GitHub Actions run; record that separately.
 
 ## Use and inspect
 
+For the whole local stack in one command, with Docker running, Compose stopped,
+the root token configured and repository changes committed:
+
+```powershell
+npm run k8s:bootstrap
+```
+
+This installs tools, builds host contracts and images, starts the cluster,
+imports images, installs operators/database/messaging, configures Argo and KEDA,
+restarts application Pods to use the rebuilt development images, then verifies
+fresh data. It preserves existing data volumes. The separate `k8s:up` remains
+the lightweight cluster-only command used by earlier lessons and CI's ordered
+recovery drill. Bootstrap refuses uncommitted repository changes and a running
+Compose stack. The recovery drill remains separate so it can run before writes.
+
 After the existing cluster, image, operator, database and messaging prerequisites:
+
+On a fresh checkout, first run `npm run build --workspace @kinetiq/contracts`
+before host-side messaging or API verification scripts. Image builds alone do
+not provide those host files.
 
 ```powershell
 npm run k8s:gitops

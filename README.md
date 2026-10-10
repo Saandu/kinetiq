@@ -325,5 +325,33 @@ Normal demo traffic uses one ingest worker. A controlled 200-message backlog
 demonstrates scaling to three ready workers and returning to one; it is not a
 throughput benchmark. Helm reserves peak worker memory plus rolling surges and
 setup Jobs: 2,304 MiB locally and 2,560 MiB in CI, excluding platform resources.
-Argo CD and disposable Kubernetes CI verification remain the next checkpoint.
 Read the [pipeline and scaling lesson](docs/lessons/PHASE_1_PIPELINE_SCALING.md).
+
+Local Argo CD Core now reconciles the committed branch through an internal
+read-only Git mirror. Both PreSync hooks and managed-field drift repair have
+passed against the running pipeline. KEDA scaled 1→3 ready workers→1 with Argo
+remaining Healthy. The bootstrap keeps database volumes and credentials outside
+application ownership. A node-memory sample with GitOps running was 3.36 GiB
+within the existing 6.7 GiB Docker/WSL allocation; it is not a worst-case estimate.
+
+```sh
+npm run k8s:gitops:status
+npm run k8s:gitops:verify
+# After committing an application chart change on the tracked branch:
+npm run k8s:gitops:publish
+```
+
+Fresh installs use `npm run k8s:gitops` after database and messaging bootstrap.
+Build the host contracts first with `npm run build --workspace @kinetiq/contracts`
+on a fresh checkout; Docker image builds compile a separate filesystem.
+After adoption, use GitOps publication instead of `k8s:app`. The full Linux
+CI cluster/recovery/GitOps checks passed in
+[run 38082106322](https://github.com/Saandu/kinetiq/actions/runs/38082106322).
+The final Dockerfile-lint and complete-bootstrap gates are being verified. Read the
+[GitOps and CI lesson](docs/lessons/PHASE_1_GITOPS_CI.md).
+
+For the complete local setup from a committed checkout with Docker running,
+Compose stopped and the root LocalStack token configured, use
+`npm run k8s:bootstrap`. It builds/imports images, configures the platform and
+GitOps/scaling, refreshes development Pods and checks fresh dashboard data while
+preserving existing database volumes. `k8s:up` remains the cluster-only command.

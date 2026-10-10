@@ -43,8 +43,8 @@ COPY --from=build /app/packages/db/dist packages/db/dist
 COPY --from=build /app/packages/db/migrations packages/db/migrations
 COPY --from=build /app/services/${SERVICE}/dist services/${SERVICE}/dist
 COPY infra/local infra/local
-USER node
+USER 1000:1000
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD node -e "fetch('http://127.0.0.1:8080/health/live', {signal: AbortSignal.timeout(4000)}).then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+  CMD ["node", "-e", "fetch('http://127.0.0.1:8080/health/live', {signal: AbortSignal.timeout(4000)}).then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
 CMD ["sh", "-c", "exec node services/$SERVICE/dist/main.js"]

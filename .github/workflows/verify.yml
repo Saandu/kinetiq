@@ -44,7 +44,7 @@ jobs:
   pipeline:
     name: Verify MQTT and SQS pipeline
     needs: verify
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -84,6 +84,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run k8s:tools
+      - run: npm run docker:lint
       - run: npm run helm:verify
       - run: npm run k8s:scaling:config
       - run: npm run k8s:gitops:config
@@ -91,9 +92,9 @@ jobs:
   kubernetes:
     name: Disposable cluster, S3 restore and GitOps pipeline
     needs: [verify, kubernetes-config]
-    # Fork PRs and arbitrary branch pushes never receive the emulator secret.
-    # A maintainer can dispatch this workflow on a reviewed branch explicitly.
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+    # Repository pushes require write access. Fork PR runs never receive this
+    # secret; do not run their code under pull_request_target/workflow_run.
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
@@ -130,14 +131,18 @@ jobs:
           # No simulator is running yet: source/restore fingerprints are stable.
           npm run k8s:database:verify
           npm run k8s:messaging
-      - name: Reconcile the committed branch and verify the running pipeline
-        run: |
-          npm run k8s:gitops -- ci
-          npm run k8s:scaling
-          npm run k8s:gitops:verify
-          npm run k8s:boundaries:verify
-          npm run k8s:scaling:verify
-          npm run k8s:gitops:status
+      - name: Reconcile the committed branch through Argo CD
+        run: npm run k8s:gitops -- ci
+      - name: Install bounded queue scaling
+        run: npm run k8s:scaling
+      - name: Verify hooks, drift repair and fresh dashboard data
+        run: npm run k8s:gitops:verify
+      - name: Verify MQTT and network boundaries
+        run: npm run k8s:boundaries:verify
+      - name: Verify backlog scaling and recovery
+        run: npm run k8s:scaling:verify
+      - name: Record reconciled revision and health
+        run: npm run k8s:gitops:status
       - name: Remove disposable cluster and local secret files
         if: always()
         run: |
